@@ -1,0 +1,22 @@
+{
+  "name": "dr1n/gogoparser",
+  "description": "Go service parser",
+  "minimum-stability": "dev",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Dr1N",
+      "email": "drn.exp@gmail.com"
+    }
+  ],
+  "require": {
+    "imangazaliev/didom": "1.9.1",
+    "guzzlehttp/guzzle": "~6.0",
+    "joshcam/mysqli-database-class": "dev-master"
+  },
+  "autoload": {
+    "psr-0": {
+      "src\\":"src/"
+    }
+  }
+}
