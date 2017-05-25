@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Хост: 127.0.0.1:3306
--- Время создания: Май 09 2016 г., 13:52
+-- Время создания: Май 26 2017 г., 00:57
 -- Версия сервера: 5.5.48
 -- Версия PHP: 5.6.19
 
@@ -53,8 +53,7 @@ CREATE TABLE IF NOT EXISTS `cities` (
   `id` int(11) NOT NULL,
   `country_id` int(11) NOT NULL COMMENT 'Country Id',
   `name` varchar(32) NOT NULL COMMENT 'Name of City',
-  `prefix` varchar(32) NOT NULL COMMENT 'Prefix for URL',
-  'url' varchar(255) NOT NULL COMMENT 'City Url',
+  `url` varchar(255) NOT NULL COMMENT 'City Url'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Cities from site';
 
 -- --------------------------------------------------------
