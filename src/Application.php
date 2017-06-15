@@ -8,4 +8,9 @@ class Application
     {
         echo 'Hello World' . PHP_EOL;
     }
+
+    public function parseCities()
+    {
+        
+    }
 }
