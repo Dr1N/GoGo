@@ -31,10 +31,7 @@ class Application
 
     public function run()
     {
-        echo 'Hello World' . PHP_EOL;
-        $city = City::findOne(1);
-        print_r($city);
-        print_r($city->getCountry());
+        echo 'Hello, World!' . PHP_EOL;
     }
 
     public function parseCities()

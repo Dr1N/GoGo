@@ -6,4 +6,14 @@ require_once 'config/config.php';
 use src\Application;
 
 $app = new Application();
-$app->run();
+$argument = $argv[1];
+switch ($argument)
+{
+    case 'cities':
+        $app->parseCities();
+        break;
+    default:
+        $app->run();
+        break;
+
+}

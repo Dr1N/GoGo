@@ -44,6 +44,9 @@ class Country extends Model
 
     public function getCities()
     {
+        if (empty($this->id)) {
+            return null;
+        }
         $result = [];
         Application::$db->where('country_id', $this->id);
         $queryResult = Application::$db->get(City::$tableName);
@@ -56,6 +59,9 @@ class Country extends Model
 
     static public function createCountryFromResult($result)
     {
+        if (empty($result)) {
+            return null;
+        }
         $country = new Country();
         $country->id = $result['id'];
         $country->name = $result['name'];
