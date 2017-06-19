@@ -6,4 +6,4 @@ require_once 'config/config.php';
 use src\Application;
 
 $app = new Application();
-$app->say();
+$app->run();
