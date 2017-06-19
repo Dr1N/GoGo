@@ -2,6 +2,7 @@
 
 namespace src;
 
+use dbObject;
 use MysqliDb;
 use src\models\Country;
 use src\models\City;
@@ -32,6 +33,9 @@ class Application
     public function run()
     {
         echo 'Hello, World!' . PHP_EOL;
+        dbObject::autoload("models");
+        $city = dbObject::table("cities")->get();
+        var_dump($city);
     }
 
     public function parseCities()
