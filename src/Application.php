@@ -2,9 +2,9 @@
 
 namespace src;
 
-use dbObject;
 use MysqliDb;
 use src\models\Country;
+use src\models\Ad;
 use src\models\City;
 
 class Application
@@ -33,9 +33,8 @@ class Application
     public function run()
     {
         echo 'Hello, World!' . PHP_EOL;
-        dbObject::autoload("models");
-        $city = dbObject::table("cities")->get();
-        var_dump($city);
+        $zp = City::findOne(45);
+        $this->parseAdsFromCity($zp);
     }
 
     public function parseCities()
@@ -59,5 +58,11 @@ class Application
             }
         }
         echo 'Parsing Done!' . PHP_EOL;
+    }
+
+    public function parseAdsFromCity(City $city)
+    {
+        $url = $city->url;
+        $adUrls = Parser::getAdUrls($url);
     }
 }

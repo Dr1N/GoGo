@@ -4,10 +4,15 @@ namespace src;
 
 use DiDom\Document;
 use DiDom\Element;
+use src\exceptions\ParseException;
 use src\models\Country;
 
 class Parser
 {
+    const CATEGORY = 'view_subsection.php?id_subsection=146';
+    const SEARCH_PARAMS = 'search=&page=';
+    const ADS_PER_PAGE = 50;
+
     /**
      * Get Cities from Country
      * @param Country $country
@@ -51,6 +56,30 @@ class Parser
         }
 
         return $cities;
+    }
+
+    static public function getAdUrls($url, $lastUrl = null)
+    {
+        $result = [];
+        $adsCount = self::getAdsCount($url);
+        $pages = ceil($adsCount / self::ADS_PER_PAGE);
+        for ($i = 1; $i <= $pages; $i++) {
+            echo $i . PHP_EOL;
+        }
+
+        return $result;
+    }
+
+    static public function getAdsCount($url)
+    {
+        $document = new Document($url . self::CATEGORY, true);
+        $spans = $document->find('span[style=font-size: 14px;]');
+        if (count($spans) != 0) {
+            return (int)$spans[0]->text();
+        }
+
+        self::logError('Can\'t find ads counter');
+        throw new ParseException('Can\'t find ads counter');
     }
 
     /**

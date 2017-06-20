@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Хост: 127.0.0.1:3306
--- Время создания: Июн 19 2017 г., 17:52
+-- Время создания: Июн 20 2017 г., 17:03
 -- Версия сервера: 5.5.48
 -- Версия PHP: 5.6.19
 
@@ -19,6 +19,38 @@ SET time_zone = "+00:00";
 --
 -- База данных: `mygo`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `ads`
+--
+
+CREATE TABLE IF NOT EXISTS `ads` (
+  `id` int(11) NOT NULL,
+  `city_id` int(11) NOT NULL,
+  `url` varchar(255) NOT NULL,
+  `title` varchar(1024) NOT NULL,
+  `date` int(11) NOT NULL,
+  `gender` int(1) DEFAULT NULL,
+  `age` int(2) DEFAULT NULL,
+  `weight` int(2) DEFAULT NULL,
+  `height` int(3) DEFAULT NULL,
+  `text` text,
+  `parsed` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `ad_phone_relation`
+--
+
+CREATE TABLE IF NOT EXISTS `ad_phone_relation` (
+  `id` int(11) NOT NULL,
+  `ad_id` int(11) NOT NULL,
+  `phone_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -409,9 +441,45 @@ INSERT INTO `countries` (`id`, `name`, `url`) VALUES
 (10, 'Туркмения', 'http://turkmengo.com/'),
 (11, 'Киргизия', 'http://kirgizgo.com/');
 
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `images`
+--
+
+CREATE TABLE IF NOT EXISTS `images` (
+  `id` int(11) NOT NULL,
+  `ad_id` int(11) NOT NULL,
+  `url` varchar(255) NOT NULL,
+  `filename` varchar(64) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `phones`
+--
+
+CREATE TABLE IF NOT EXISTS `phones` (
+  `id` int(11) NOT NULL,
+  `phone` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 --
 -- Индексы сохранённых таблиц
 --
+
+--
+-- Индексы таблицы `ads`
+--
+ALTER TABLE `ads`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Индексы таблицы `ad_phone_relation`
+--
+ALTER TABLE `ad_phone_relation`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Индексы таблицы `cities`
@@ -426,9 +494,31 @@ ALTER TABLE `countries`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Индексы таблицы `images`
+--
+ALTER TABLE `images`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Индексы таблицы `phones`
+--
+ALTER TABLE `phones`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- AUTO_INCREMENT для сохранённых таблиц
 --
 
+--
+-- AUTO_INCREMENT для таблицы `ads`
+--
+ALTER TABLE `ads`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT для таблицы `ad_phone_relation`
+--
+ALTER TABLE `ad_phone_relation`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT для таблицы `cities`
 --
@@ -439,6 +529,16 @@ ALTER TABLE `cities`
 --
 ALTER TABLE `countries`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=12;
+--
+-- AUTO_INCREMENT для таблицы `images`
+--
+ALTER TABLE `images`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT для таблицы `phones`
+--
+ALTER TABLE `phones`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
