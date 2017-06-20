@@ -4,6 +4,7 @@ namespace src;
 
 use DiDom\Document;
 use DiDom\Element;
+use src\models\Ad;
 use src\models\Country;
 
 class Parser
@@ -30,7 +31,7 @@ class Parser
                 }
             }
         } catch (\Exception $ex) {
-            self::logError($ex->getMessage());
+            self::logParsing($ex->getMessage());
         }
 
         return $result;
@@ -51,7 +52,7 @@ class Parser
                 $cities = self::getCitiesLinks($citiesTable[0], 'li>a.link');
             }
         } catch (\Exception $ex) {
-            self::logError($ex->getMessage());
+            self::logParsing($ex->getMessage());
         }
 
         return $cities;
@@ -62,16 +63,18 @@ class Parser
         $result = [];
         $adsCount = self::getAdsCount($url);
         $pages = ceil($adsCount / self::ADS_PER_PAGE);
+        self::logParsing('FIND: ' . $pages . ' Pages');
         for ($page = 1; $page <= $pages; $page++) {
             echo 'Page: ' . $page;
-            $currentUrl = $url;
+            $currentUrl = $url . self::CATEGORY;
             if ($page > 1) {
-                $currentUrl = $url . self::CATEGORY . '?' . self::SEARCH_PARAMS . $page;
+                $currentUrl = $currentUrl . '?' . self::SEARCH_PARAMS . $page;
             }
             echo "\tUrl: " . $currentUrl . PHP_EOL;
             $urls = self::getUrlsFromPage($currentUrl, $lastUrl);
             $result = array_merge($result, $urls);
         }
+        self::logParsing('FIND: ' . count($result) . ' Urls');
 
         return $result;
     }
@@ -85,8 +88,8 @@ class Parser
                 return (int)$spans[0]->text();
             }
         } catch (\Exception $ex) {
-            self::logError('Can\'t find ads counter');
-            self::logError($ex->getMessage());
+            self::logParsing('Can\'t find ads counter');
+            self::logParsing($ex->getMessage());
         }
         return 0;
     }
@@ -95,6 +98,7 @@ class Parser
     {
         $result = [];
         try {
+            self::logParsing('Page URL: ' . $url);
             $document = new Document($url, true);
             $contentDiv = $document->find('div.main-content');
             if (count($contentDiv) != 0) {
@@ -104,12 +108,91 @@ class Parser
                     if (!empty($lastUrl) && $lastUrl == $adUrl) {
                         break;
                     }
-                    $result[] = $adUrl;
+                    if ($link->has('b')) {
+                        $result[] = $adUrl;
+                    }
                 }
             }
         } catch (\Exception $ex) {
-            self::logError('Can\'t find ad urls on page');
-            self::logError($ex->getMessage());
+            self::logParsing('Can\'t find ad urls on page');
+            self::logParsing($ex->getMessage());
+        }
+        self::logParsing('URLs on Page: ' . count($result));
+
+        return $result;
+    }
+
+    static public function getAdDataByUrl($url)
+    {
+        $result = [];
+        try {
+            self::logParsing('AD URL: ' . $url );
+            $document = new Document($url, true);
+            //Title
+            $result['title'] = $document->find('h1[style^=display: inline]')[0]->text();
+            $divInfo = $document->find('div[style=color: #242424; font-size: 12px; margin-top: 5px;]');
+            if (count($divInfo) != 0) {
+                $infoHtml = $divInfo[0]->innerHtml();
+                //Date
+                if (preg_match('/<b>Дата подачи объявления:<\/b>\s*(.*)<br>/iU', $infoHtml, $matches)) {
+                    if (count($matches) == 2) {
+                        $result['date'] = strtotime(trim($matches[1]));
+                    }
+                }
+                //Gender
+                if (preg_match('/<b>Пол:<\/b>\s*(.*)<br>/iU', $infoHtml, $matches)) {
+                    if (count($matches) == 2) {
+                        $result['gender'] = ((trim($matches[1])) == 'женщина') ? Ad::FEMALE : Ad::MALE;
+                    }
+                }
+                //Age
+                if (preg_match('/<b>Возраст:<\/b>\s*(.*)<br>/iU', $infoHtml, $matches)) {
+                    if (count($matches) == 2) {
+                        $result['age'] = intval(trim($matches[1]));
+                    }
+                }
+                //Weight
+                if (preg_match('/<b>Вес:<\/b>\s*(.*)<br>/iU', $infoHtml, $matches)) {
+                    if (count($matches) == 2) {
+                        $result['weight'] = intval(trim($matches[1]));
+                    }
+                }
+                //Height
+                if (preg_match('/<b>Рост:<\/b>\s*(.*)<br>/iU', $infoHtml, $matches)) {
+                    if (count($matches) == 2) {
+                        $result['height'] = intval(trim($matches[1]));
+                    }
+                }
+                //Text
+                $textDiv = $document->find('div[style=margin-top: 15px; text-align: left; width: 100%; color: #2a2a2a; font-size: 14px;]');
+                if (count($textDiv) != 0) {
+                    if (preg_match('/(.*)\s*<div/i', $textDiv[0]->innerHtml(), $matches)) {
+                        $result['text'] = trim($matches[1]);
+                    }
+                    //Phones
+                    $phones = $textDiv[0]->find('span');
+                    if (count($phones) != 0) {
+                        $result['phones'] = array_map('trim', explode(';', $phones[0]->text()));
+                    }
+                }
+                //Images
+                $result['images'] = self::getImagesForAd($document);
+            }
+
+        } catch (\Exception $ex) {
+            self::logParsing('Can\'t parse ad');
+            self::logParsing($ex->getMessage());
+        }
+
+        return $result;
+    }
+
+    static public function getImagesForAd(Document $document)
+    {
+        $result = [];
+        $images = $document->find('img[style^=max-width: 120px; max-height: 120px;]');
+        foreach ($images as $image) {
+            $result[] = $image->getAttribute('src');
         }
 
         return $result;
@@ -133,7 +216,7 @@ class Parser
                 }
             }
         } catch (\Exception $ex) {
-            self::logError($ex->getMessage());
+            self::logParsing($ex->getMessage());
         }
 
         return $result;
@@ -144,7 +227,7 @@ class Parser
      * @param $error
      * @param string $filename
      */
-    static private function logError($error, $filename = 'parser.log')
+    static private function logParsing($error, $filename = 'parser.log')
     {
         echo $error . PHP_EOL;
         file_put_contents("logs/$filename", date('d.m.Y H:i:s') . "\t" . $error . PHP_EOL, FILE_APPEND);

@@ -7,6 +7,9 @@ use src\base\Model;
 
 class Ad extends Model
 {
+    const FEMALE = 0;
+    const MALE = 1;
+
     static public $tableName = 'ads';
 
     public $id;
@@ -46,8 +49,9 @@ class Ad extends Model
         return $ads;
     }
 
-    static public function findLastAd()
+    static public function findLastAdInCity(City $city)
     {
+        Application::$db->where('city_id', $city->id);
         Application::$db->orderBy('id', 'DESC');
         $lastAd = Application::$db->get(static::$tableName, 1);
 

@@ -3,9 +3,9 @@
 namespace src;
 
 use MysqliDb;
-use src\models\Country;
 use src\models\Ad;
 use src\models\City;
+use src\models\Country;
 
 class Application
 {
@@ -30,7 +30,7 @@ class Application
         }
     }
 
-    public function run()
+    public function run(Country $country = null, City $city = null)
     {
         echo 'Hello, World!' . PHP_EOL;
         $zp = City::findOne(45);
@@ -59,12 +59,25 @@ class Application
         }
         echo 'Parsing Done!' . PHP_EOL;
     }
-
+    
+    public function parseAdsFromCountry(Country $country)
+    {
+        $cities = $country->getCities();
+        foreach ($cities as $city) {
+            $this->parseAdsFromCity($city);
+        }
+    }
+    
     public function parseAdsFromCity(City $city)
     {
         $url = $city->url;
-        $urlList = Parser::getAdUrls($url);
-        
+        $lastAd = Ad::findLastAdInCity($city);
+        $urlList = Parser::getAdUrls($url, $lastAd->url);
         print_r($urlList);
+        /*
+        foreach ($urlList as $url) {
+            $ad = Parser::getAd($url);
+        }
+        */
     }
 }
