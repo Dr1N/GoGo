@@ -63,6 +63,8 @@ class Application
     public function parseAdsFromCity(City $city)
     {
         $url = $city->url;
-        $adUrls = Parser::getAdUrls($url);
+        $urlList = Parser::getAdUrls($url);
+        
+        print_r($urlList);
     }
 }

@@ -4,7 +4,6 @@ namespace src;
 
 use DiDom\Document;
 use DiDom\Element;
-use src\exceptions\ParseException;
 use src\models\Country;
 
 class Parser
@@ -63,8 +62,15 @@ class Parser
         $result = [];
         $adsCount = self::getAdsCount($url);
         $pages = ceil($adsCount / self::ADS_PER_PAGE);
-        for ($i = 1; $i <= $pages; $i++) {
-            echo $i . PHP_EOL;
+        for ($page = 1; $page <= $pages; $page++) {
+            echo 'Page: ' . $page;
+            $currentUrl = $url;
+            if ($page > 1) {
+                $currentUrl = $url . self::CATEGORY . '?' . self::SEARCH_PARAMS . $page;
+            }
+            echo "\tUrl: " . $currentUrl . PHP_EOL;
+            $urls = self::getUrlsFromPage($currentUrl, $lastUrl);
+            $result = array_merge($result, $urls);
         }
 
         return $result;
@@ -72,14 +78,41 @@ class Parser
 
     static public function getAdsCount($url)
     {
-        $document = new Document($url . self::CATEGORY, true);
-        $spans = $document->find('span[style=font-size: 14px;]');
-        if (count($spans) != 0) {
-            return (int)$spans[0]->text();
+        try {
+            $document = new Document($url . self::CATEGORY, true);
+            $spans = $document->find('span[style=font-size: 14px;]');
+            if (count($spans) != 0) {
+                return (int)$spans[0]->text();
+            }
+        } catch (\Exception $ex) {
+            self::logError('Can\'t find ads counter');
+            self::logError($ex->getMessage());
+        }
+        return 0;
+    }
+
+    static public function getUrlsFromPage($url, $lastUrl)
+    {
+        $result = [];
+        try {
+            $document = new Document($url, true);
+            $contentDiv = $document->find('div.main-content');
+            if (count($contentDiv) != 0) {
+                $links = $contentDiv[0]->find('a.link_post');
+                foreach ($links as $link) {
+                    $adUrl = $link->getAttribute('href');
+                    if (!empty($lastUrl) && $lastUrl == $adUrl) {
+                        break;
+                    }
+                    $result[] = $adUrl;
+                }
+            }
+        } catch (\Exception $ex) {
+            self::logError('Can\'t find ad urls on page');
+            self::logError($ex->getMessage());
         }
 
-        self::logError('Can\'t find ads counter');
-        throw new ParseException('Can\'t find ads counter');
+        return $result;
     }
 
     /**
@@ -114,6 +147,6 @@ class Parser
     static private function logError($error, $filename = 'parser.log')
     {
         echo $error . PHP_EOL;
-        file_put_contents("logs/$filename", date('d.m.Y H:i:s') . $error . PHP_EOL, FILE_APPEND);
+        file_put_contents("logs/$filename", date('d.m.Y H:i:s') . "\t" . $error . PHP_EOL, FILE_APPEND);
     }
 }
