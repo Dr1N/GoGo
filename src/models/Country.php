@@ -42,6 +42,14 @@ class Country extends Model
         return self::createCountryFromResult($result);
     }
 
+    static public function findByName($name)
+    {
+        Application::$db->where('name', $name);
+        $result = Application::$db->getOne(static::$tableName);
+
+        return self::createCountryFromResult($result);
+    }
+
     public function getCities()
     {
         if (empty($this->id)) {

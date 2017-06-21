@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Хост: 127.0.0.1:3306
--- Время создания: Июн 20 2017 г., 17:03
+-- Время создания: Июн 21 2017 г., 03:04
 -- Версия сервера: 5.5.48
 -- Версия PHP: 5.6.19
 
@@ -29,9 +29,9 @@ SET time_zone = "+00:00";
 CREATE TABLE IF NOT EXISTS `ads` (
   `id` int(11) NOT NULL,
   `city_id` int(11) NOT NULL,
-  `url` varchar(255) NOT NULL,
-  `title` varchar(1024) NOT NULL,
-  `date` int(11) NOT NULL,
+  `url` varchar(512) NOT NULL,
+  `title` varchar(1024) DEFAULT NULL,
+  `date` int(11) DEFAULT NULL,
   `gender` int(1) DEFAULT NULL,
   `age` int(2) DEFAULT NULL,
   `weight` int(2) DEFAULT NULL,
@@ -462,7 +462,7 @@ CREATE TABLE IF NOT EXISTS `images` (
 
 CREATE TABLE IF NOT EXISTS `phones` (
   `id` int(11) NOT NULL,
-  `phone` int(11) DEFAULT NULL
+  `phone` varchar(16) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --

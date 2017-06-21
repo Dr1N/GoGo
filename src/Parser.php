@@ -4,14 +4,18 @@ namespace src;
 
 use DiDom\Document;
 use DiDom\Element;
+use GuzzleHttp\Exception\ClientException;
 use src\models\Ad;
 use src\models\Country;
+use GuzzleHttp\Client;
 
 class Parser
 {
     const CATEGORY = 'view_subsection.php?id_subsection=146';
     const SEARCH_PARAMS = 'search=&page=';
     const ADS_PER_PAGE = 50;
+    const ATTEMPT_DOWNLOAD = 3;
+    const ATTEMPT_PAUSE = 1;
 
     /**
      * Get Cities from Country
@@ -98,7 +102,6 @@ class Parser
     {
         $result = [];
         try {
-            self::logParsing('Page URL: ' . $url);
             $document = new Document($url, true);
             $contentDiv = $document->find('div.main-content');
             if (count($contentDiv) != 0) {
@@ -127,7 +130,10 @@ class Parser
         $result = [];
         try {
             self::logParsing('AD URL: ' . $url );
-            $document = new Document($url, true);
+            $document = self::getDocument($url);
+            if ($document === null) return $result;
+            //Url
+            $result['url'] = $url;
             //Title
             $result['title'] = $document->find('h1[style^=display: inline]')[0]->text();
             $divInfo = $document->find('div[style=color: #242424; font-size: 12px; margin-top: 5px;]');
@@ -182,6 +188,7 @@ class Parser
         } catch (\Exception $ex) {
             self::logParsing('Can\'t parse ad');
             self::logParsing($ex->getMessage());
+            self::logParsing($ex->getTraceAsString());
         }
 
         return $result;
@@ -231,5 +238,42 @@ class Parser
     {
         echo $error . PHP_EOL;
         file_put_contents("logs/$filename", date('d.m.Y H:i:s') . "\t" . $error . PHP_EOL, FILE_APPEND);
+    }
+
+    /**
+     * @param $url
+     * @return array
+     */
+    private static function getDocument($url)
+    {
+        $document = null;
+        //DiDom
+        for ($i = 0; $i < self::ATTEMPT_DOWNLOAD; $i++) {
+            try {
+                $document = new Document($url, true);
+                return $document;
+            } catch (\Exception $ex) {
+                echo $ex->getMessage() . PHP_EOL;
+                echo 'ATTEMPT: ' . $i . PHP_EOL;
+                sleep(self::ATTEMPT_PAUSE);
+            }
+        }
+        //Guzzle
+        echo 'GUZZLE' . PHP_EOL;
+        try {
+            $client = new Client();
+            $response = $client->request('GET',$url);
+            $body = $response->getBody()->getContents();
+            $document = new Document($body);
+        } catch (ClientException $cex) {
+            self::logParsing($cex->getMessage());
+            self::logParsing($cex->getCode());
+            self::logParsing($cex->getRequest()->getUri());
+            self::logParsing($cex->getResponse()->getHeaders());
+        } catch (\Exception $ex) {
+            self::logParsing($ex->getMessage());
+        }
+
+        return $document;
     }
 }

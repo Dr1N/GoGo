@@ -71,30 +71,6 @@ class City extends Model
         return Country::createCountryFromResult($result);
     }
 
-    /**
-     * Insert city
-     * @return bool|null
-     */
-    public function insert()
-    {
-        if (!$this->validate()) {
-            return null;
-        }
-        $data = [
-            'country_id' => $this->country_id,
-            'name' => $this->name,
-            'url' => $this->url,
-        ];
-        $id = Application::$db->insert(self::$tableName, $data);
-
-        return $id;
-    }
-
-    public function validate()
-    {
-        return true;
-    }
-
     static public function createCityFromResult($result)
     {
         if (empty($result)) {

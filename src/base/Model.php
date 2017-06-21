@@ -12,6 +12,31 @@ class Model
     public static $tableName;
 
     /**
+     * Insert AD
+     * @return false|integer
+     */
+    public function insert()
+    {
+        if (!$this->validate()) {
+            return null;
+        }
+        $data = [];
+        foreach ($this as $key => $value) {
+            $data[$key] = $value;
+        }
+        if (!empty($data)) {
+            return Application::$db->insert(static::$tableName, $data);
+        }
+
+        return false;
+    }
+
+    public function validate()
+    {
+        return true;
+    }
+
+    /**
      * Return table as array
      * @param null $limit
      * @return array
