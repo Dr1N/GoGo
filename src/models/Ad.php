@@ -52,18 +52,26 @@ class Ad extends Model
     static public function findLastAdInCity(City $city)
     {
         Application::$db->where('city_id', $city->id);
-        $lastAd = Application::$db->get(static::$tableName, 1);
+        $lastAd = Application::$db->getOne(static::$tableName);
 
         return static::createAdFromResult($lastAd);
     }
 
-    static public function findUnparsedAdCnt($cityId)
+    /**
+     * @param $cityId
+     * @return Ad[]
+     */
+    static public function findUnparsedAd($cityId)
     {
+        $result = [];
         Application::$db->where('city_id', $cityId);
         Application::$db->where('parsed', null, 'IS');
         $ads = Application::$db->get(static::$tableName);
-
-        return count($ads);
+        foreach ($ads as $ad) {
+            $result[] = self::createAdFromResult($ad);
+        }
+        
+        return $result;
     }
 
     static public function createAdFromResult($result)

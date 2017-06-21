@@ -103,14 +103,14 @@ class Application
         $urlList = Parser::getAdUrls($url, $lastAd->url);
         $this->saveUrls($urlList, $city->id);
 
-        //TODO
-        return;
         //Ads
-        foreach ($urlList as $url) {
-            $parsedData = Parser::getAdDataByUrl($url);
+        $unparsedAds = Ad::findUnparsedAd($city->id);
+        foreach ($unparsedAds as $unparsedAd) {
+            /* @var $unparsedAd Ad*/
+            $parsedData = Parser::getAdDataByUrl($unparsedAd->url);
             if (empty($parsedData)) continue;
             //AD Model
-            $adId = $this->saveAdModel($city->id, $parsedData);
+            $adId = $this->saveAdModel($unparsedAd, $parsedData);
             if ($adId === false) {
                 echo 'AD SAVE ERROR!' . PHP_EOL;
                 continue;
@@ -128,26 +128,18 @@ class Application
         }
     }
 
-    /**
-     * @param $city_id
-     * @param $parsedData
-     * @return false|integer
-     */
-    private function saveAdModel($city_id, $parsedData)
+    private function saveAdModel(Ad $model, $parsedData)
     {
-        $adModel = new Ad();
-        $adModel->city_id = $city_id;
-        $adModel->url = $parsedData['url'];
-        $adModel->title = isset($parsedData['title']) ? $parsedData['title'] : null;
-        $adModel->date = isset($parsedData['date']) ? $parsedData['date'] : null;
-        $adModel->gender = isset($parsedData['gender']) ? $parsedData['gender'] : null;
-        $adModel->age = isset($parsedData['age']) ? $parsedData['age'] : null;
-        $adModel->weight = isset($parsedData['weight']) ? $parsedData['weight'] : null;
-        $adModel->height = isset($parsedData['height']) ? $parsedData['height'] : null;
-        $adModel->text = isset($parsedData['text']) ? $parsedData['text'] : null;
-        $adModel->parsed = time();
+        $model->title = isset($parsedData['title']) ? $parsedData['title'] : null;
+        $model->date = isset($parsedData['date']) ? $parsedData['date'] : null;
+        $model->gender = isset($parsedData['gender']) ? $parsedData['gender'] : null;
+        $model->age = isset($parsedData['age']) ? $parsedData['age'] : null;
+        $model->weight = isset($parsedData['weight']) ? $parsedData['weight'] : null;
+        $model->height = isset($parsedData['height']) ? $parsedData['height'] : null;
+        $model->text = isset($parsedData['text']) ? $parsedData['text'] : null;
+        $model->parsed = time();
 
-        return $adModel->insert();
+        return $model->save();
     }
 
     /**
@@ -187,7 +179,9 @@ class Application
             try {
                 $fileName = array_pop(explode('/', $image));
                 $fullName = 'images' . DIRECTORY_SEPARATOR . $fileName;
-                file_put_contents($fullName, file_get_contents($imageModel->url));
+                if (!file_exists($fullName)) {
+                    file_put_contents($fullName, file_get_contents($imageModel->url));
+                }
                 $imageModel->filename = $fileName;
             } catch (\Exception $ex) {
                 $imageModel->filename = null;
@@ -205,7 +199,9 @@ class Application
             $ad = new Ad();
             $ad->city_id = $cityId;
             $ad->url = $url;
-            $ad->insert();
+            if ($ad->insert() === false) {
+                echo 'URL SAVE ERROR' . PHP_EOL;
+            }
         }
     }
 }

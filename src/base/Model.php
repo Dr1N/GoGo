@@ -18,17 +18,41 @@ class Model
     public function insert()
     {
         if (!$this->validate()) {
-            return null;
+            return false;
         }
         $data = [];
         foreach ($this as $key => $value) {
             $data[$key] = $value;
         }
         if (!empty($data)) {
-            if (!Application::$db->ping()) {
+            try {
+                Application::$db->ping();
+            } catch (\Exception $ex) {
                 Application::$db->connect();
             }
             return Application::$db->insert(static::$tableName, $data);
+        }
+
+        return false;
+    }
+
+    public function save()
+    {
+        if (!$this->validate()) {
+            return false;
+        }
+        $data = [];
+        foreach ($this as $key => $value) {
+            $data[$key] = $value;
+        }
+        if (!empty($data)) {
+            try {
+                Application::$db->ping();
+            } catch (\Exception $ex) {
+                Application::$db->connect();
+            }
+            Application::$db->where('id', $this->id);
+            return Application::$db->update(static::$tableName, $data);
         }
 
         return false;

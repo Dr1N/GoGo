@@ -75,8 +75,9 @@ class Parser
                 $currentUrl = $currentUrl . '?' . self::SEARCH_PARAMS . $page;
             }
             echo "\tUrl: " . $currentUrl . PHP_EOL;
-            $urls = self::getUrlsFromPage($currentUrl, $lastUrl);
+            list($urls, $isContinue) = self::getUrlsFromPage($currentUrl, $lastUrl);
             $result = array_merge($result, $urls);
+            if (!$isContinue) break;
         }
         self::logParsing('FIND: ' . count($result) . ' Urls');
 
@@ -109,7 +110,7 @@ class Parser
                 foreach ($links as $link) {
                     $adUrl = $link->getAttribute('href');
                     if (!empty($lastUrl) && $lastUrl == $adUrl) {
-                        break;
+                        return [$result, false];
                     }
                     if ($link->has('b')) {
                         $result[] = $adUrl;
@@ -122,14 +123,14 @@ class Parser
         }
         self::logParsing('URLs on Page: ' . count($result));
 
-        return $result;
+        return [$result, true];
     }
 
     static public function getAdDataByUrl($url)
     {
         $result = [];
         try {
-            self::logParsing('AD URL: ' . $url );
+            self::logParsing('AD URL: ' . $url);
             $document = self::getDocument($url);
             if ($document === null) return $result;
             //Url
