@@ -95,13 +95,7 @@ class Application
     private function parseAdsFromCity(City $city)
     {
         //Urls
-        $url = $city->url;
-        $lastAd = Ad::findLastAdInCity($city);
-        if ($lastAd != null) {
-            echo 'LAST AD: ' . $lastAd->url . PHP_EOL;
-        }
-        $urlList = Parser::getAdUrls($url, $lastAd->url);
-        $this->saveUrls($urlList, $city->id);
+        $this->parseUrlsForCity($city);
 
         //Ads
         $unparsedAds = Ad::findUnparsedAd($city->id);
@@ -126,6 +120,7 @@ class Application
             }
             echo 'SAVED' . PHP_EOL;
         }
+        echo 'DONE' . PHP_EOL;
     }
 
     private function saveAdModel(Ad $model, $parsedData)
@@ -193,6 +188,20 @@ class Application
         }
     }
     
+    /**
+     * @param City $city
+     */
+    private function parseUrlsForCity(City $city)
+    {
+        $url = $city->url;
+        $lastAd = Ad::findLastAdInCity($city);
+        if ($lastAd != null) {
+            echo 'LAST AD: ' . $lastAd->url . PHP_EOL;
+        }
+        $urlList = Parser::getAdUrls($url, $lastAd->url);
+        $this->saveUrls($urlList, $city->id);
+    }
+
     private function saveUrls($urls, $cityId)
     {
         foreach ($urls as $url) {

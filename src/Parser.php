@@ -143,7 +143,8 @@ class Parser
                 //Date
                 if (preg_match('/<b>Дата подачи объявления:<\/b>\s*(.*)<br>/iU', $infoHtml, $matches)) {
                     if (count($matches) == 2) {
-                        $result['date'] = strtotime(trim($matches[1]));
+                        $date = \DateTime::createFromFormat('d.m.Y H:i', trim($matches[1]));
+                        $result['date'] = $date->getTimestamp();
                     }
                 }
                 //Gender

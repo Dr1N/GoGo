@@ -52,6 +52,10 @@ class Ad extends Model
     static public function findLastAdInCity(City $city)
     {
         Application::$db->where('city_id', $city->id);
+        $maxDate = Application::$db->rawQueryValue('SELECT MAX(`parsed`) FROM ads');
+       
+        Application::$db->where('city_id', $city->id);
+        Application::$db->where('parsed', $maxDate[0]);
         $lastAd = Application::$db->getOne(static::$tableName);
 
         return static::createAdFromResult($lastAd);
@@ -70,7 +74,7 @@ class Ad extends Model
         foreach ($ads as $ad) {
             $result[] = self::createAdFromResult($ad);
         }
-        
+
         return $result;
     }
 
