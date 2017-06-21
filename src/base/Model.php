@@ -25,6 +25,9 @@ class Model
             $data[$key] = $value;
         }
         if (!empty($data)) {
+            if (!Application::$db->ping()) {
+                Application::$db->connect();
+            }
             return Application::$db->insert(static::$tableName, $data);
         }
 
