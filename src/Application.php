@@ -117,12 +117,12 @@ class Application
             }
             //Phone Models
             if (!empty($parsedData['phones'])) {
-                $this->saveAdPhones($parsedData['phones'], $adId);
+                $this->saveAdPhones($parsedData['phones'], $unparsedAd->id);
             }
             
             //Image Models
             if (!empty($parsedData['images'])) {
-                $this->saveAdImages($parsedData['images'], $adId, $city->url);
+                $this->saveAdImages($parsedData['images'], $unparsedAd->id, $city->url);
             }
             echo 'SAVED' . PHP_EOL;
         }
