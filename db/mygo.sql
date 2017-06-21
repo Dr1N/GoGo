@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Хост: 127.0.0.1:3306
--- Время создания: Июн 21 2017 г., 03:04
+-- Время создания: Июн 22 2017 г., 02:19
 -- Версия сервера: 5.5.48
 -- Версия PHP: 5.6.19
 
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `ads` (
   `weight` int(2) DEFAULT NULL,
   `height` int(3) DEFAULT NULL,
   `text` text,
-  `parsed` int(11) NOT NULL
+  `parsed` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------

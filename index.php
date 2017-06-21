@@ -6,9 +6,6 @@ require_once 'config/config.php';
 use src\Application;
 
 $app = new Application();
-//$app->run();
-//TODO
-$app->clear(); //die();
 
 if ($argc == 2) {
     if ($argv[1] == 'cities') {

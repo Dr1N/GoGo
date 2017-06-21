@@ -184,17 +184,19 @@ class Application
             $imageModel = new Image();
             $imageModel->ad_id = $adId;
             $imageModel->url = $cityUrl . substr($image, 2);
+            $imageModel->filename = null;
             //File
-            try {
-                $fileName = array_pop(explode('/', $image));
-                $fullName = 'images' . DIRECTORY_SEPARATOR . $fileName;
-                if (!file_exists($fullName)) {
-                    file_put_contents($fullName, file_get_contents($imageModel->url));
+            if (SAVE_IMAGE) {
+                try {
+                    $fileName = array_pop(explode('/', $image));
+                    $fullName = 'images' . DIRECTORY_SEPARATOR . $fileName;
+                    if (!file_exists($fullName)) {
+                        file_put_contents($fullName, file_get_contents($imageModel->url));
+                    }
+                    $imageModel->filename = $fileName;
+                } catch (\Exception $ex) {
+                    echo $ex->getMessage() . PHP_EOL;
                 }
-                $imageModel->filename = $fileName;
-            } catch (\Exception $ex) {
-                $imageModel->filename = null;
-                echo $ex->getMessage() . PHP_EOL;
             }
             if ($imageModel->insert() === false) {
                 echo 'IMAGE SAVE ERROR!' . PHP_EOL;
