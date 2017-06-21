@@ -4,10 +4,10 @@ namespace src;
 
 use DiDom\Document;
 use DiDom\Element;
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use src\models\Ad;
 use src\models\Country;
-use GuzzleHttp\Client;
 
 class Parser
 {
