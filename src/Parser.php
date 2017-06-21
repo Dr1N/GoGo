@@ -78,8 +78,6 @@ class Parser
             list($urls, $isContinue) = self::getUrlsFromPage($currentUrl, $lastUrl);
             $result = array_merge($result, $urls);
             if (!$isContinue) break;
-            //TODO
-            break;
         }
         echo 'FIND: ' . count($result) . ' Urls' . PHP_EOL;
 
