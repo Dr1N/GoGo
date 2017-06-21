@@ -94,9 +94,18 @@ class Application
 
     private function parseAdsFromCity(City $city)
     {
+        //Urls
         $url = $city->url;
         $lastAd = Ad::findLastAdInCity($city);
+        if ($lastAd != null) {
+            echo 'LAST AD: ' . $lastAd->url . PHP_EOL;
+        }
         $urlList = Parser::getAdUrls($url, $lastAd->url);
+        $this->saveUrls($urlList, $city->id);
+
+        //TODO
+        return;
+        //Ads
         foreach ($urlList as $url) {
             $parsedData = Parser::getAdDataByUrl($url);
             if (empty($parsedData)) continue;
@@ -187,6 +196,16 @@ class Application
             if ($imageModel->insert() === false) {
                 echo 'IMAGE SAVE ERROR!' . PHP_EOL;
             }
+        }
+    }
+    
+    private function saveUrls($urls, $cityId)
+    {
+        foreach ($urls as $url) {
+            $ad = new Ad();
+            $ad->city_id = $cityId;
+            $ad->url = $url;
+            $ad->insert();
         }
     }
 }
