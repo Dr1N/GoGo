@@ -254,8 +254,6 @@ class Parser
                 $document = new Document($url, true);
                 return $document;
             } catch (\Exception $ex) {
-                echo $ex->getMessage() . PHP_EOL;
-                echo 'ATTEMPT: ' . $i . PHP_EOL;
                 sleep(self::ATTEMPT_PAUSE);
             }
         }
@@ -263,7 +261,7 @@ class Parser
         echo 'GUZZLE' . PHP_EOL;
         try {
             $client = new Client();
-            $response = $client->request('GET',$url);
+            $response = $client->request('GET', $url);
             $body = $response->getBody()->getContents();
             $document = new Document($body);
         } catch (ClientException $cex) {
