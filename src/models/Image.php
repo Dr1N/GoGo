@@ -11,6 +11,11 @@ class Image extends Model
     /**
      * @var integer
      */
+    public $id;
+
+    /**
+     * @var integer
+     */
     public $ad_id;
 
     /**

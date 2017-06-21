@@ -29,35 +29,12 @@ class City extends Model
      */
     public $url;
 
-    /**
-     * Find all cities
-     * @param null $limit
-     * @return City[]
-     */
-    public static function findAll($limit = null)
-    {
-        $cities = [];
-        $table = self::getTableRecords($limit);
-        foreach ($table as $item) {
-            $cities[] = self::createCityFromResult($item);
-        }
-        return $cities;
-    }
-
-    static public function findOne($id)
-    {
-        Application::$db->where('id', $id);
-        $result = Application::$db->getOne(static::$tableName);
-
-        return self::createCityFromResult($result);
-    }
-
     static public function findByName($name)
     {
         Application::$db->where('name', $name);
-        $result = Application::$db->getOne(static::$tableName);
+        $result = Application::$db->getOne(self::$tableName);
 
-        return self::createCityFromResult($result);
+        return self::createObjectFromArray($result);
     }
 
     public function getCountry()
@@ -68,20 +45,6 @@ class City extends Model
         Application::$db->where('id', $this->country_id);
         $result = Application::$db->getOne(Country::$tableName);
 
-        return Country::createCountryFromResult($result);
-    }
-
-    static public function createCityFromResult($result)
-    {
-        if (empty($result)) {
-            return null;
-        }
-        $city = new City();
-        $city->id = $result['id'];
-        $city->country_id = $result['country_id'];
-        $city->name = $result['name'];
-        $city->url = $result['url'];
-
-        return $city;
+        return Country::createObjectFromArray($result);
     }
 }

@@ -36,17 +36,17 @@ class Application
     public function run($country = null, $city = null)
     {
         if (!empty($country)) {
-            $country = Country::findByName(iconv('CP1251', 'UTF-8', $country));
-            if ($country != null) {
-                $this->parseAdsFromCountry($country);
+            $countryModel = Country::findByName(iconv('CP1251', 'UTF-8', $country));
+            if ($countryModel != null) {
+                $this->parseAdsFromCountry($countryModel);
             } else {
                 echo 'INCORRECT COUNTRY: ' . $country . PHP_EOL;
             }
         }
         if (!empty($city)) {
-            $city = City::findByName(iconv('CP1251', 'UTF-8', $city));
-            if ($city != null) {
-                $this->parseAdsFromCity($city);
+            $cityModel = City::findByName(iconv('CP1251', 'UTF-8', $city));
+            if ($cityModel != null) {
+                $this->parseAdsFromCity($cityModel);
             } else {
                 echo 'INCORRECT CITY: ' . $city . PHP_EOL;
             }
@@ -144,18 +144,30 @@ class Application
     private function saveAdPhones($phones, $adId)
     {
         foreach ($phones as $phone) {
-            $phoneModel = new Phone();
-            $phoneModel->phone = trim($phone);
-            $phoneId = $phoneModel->insert();
-            if ($phoneId !== false) {
+            $existsPhone = Phone::findByPhone($phone);
+            if ($existsPhone == null) {
+                //Create Phone And Relation
+                $phoneModel = new Phone();
+                $phoneModel->phone = trim($phone);
+                $phoneId = $phoneModel->insert();
+                if ($phoneId !== false) {
+                    $adPhoneRelation = new AdPhoneRelation();
+                    $adPhoneRelation->ad_id = $adId;
+                    $adPhoneRelation->phone_id = $phoneId;
+                    if ($adPhoneRelation->insert() === false) {
+                        echo 'AD PHONE RELATION SAVE ERROR!' . PHP_EOL;
+                    }
+                } else {
+                    echo 'PHONE SAVE ERROR!' . PHP_EOL;
+                }
+            } else {
+                //Add Relation
                 $adPhoneRelation = new AdPhoneRelation();
                 $adPhoneRelation->ad_id = $adId;
-                $adPhoneRelation->phone_id = $phoneId;
+                $adPhoneRelation->phone_id = $existsPhone->id;
                 if ($adPhoneRelation->insert() === false) {
                     echo 'AD PHONE RELATION SAVE ERROR!' . PHP_EOL;
                 }
-            } else {
-                echo 'PHONE SAVE ERROR!' . PHP_EOL;
             }
         }
     }
@@ -168,9 +180,11 @@ class Application
     private function saveAdImages($images, $adId, $cityUrl)
     {
         foreach ($images as $image) {
+            //Model
             $imageModel = new Image();
             $imageModel->ad_id = $adId;
             $imageModel->url = $cityUrl . substr($image, 2);
+            //File
             try {
                 $fileName = array_pop(explode('/', $image));
                 $fullName = 'images' . DIRECTORY_SEPARATOR . $fileName;
@@ -187,7 +201,7 @@ class Application
             }
         }
     }
-    
+
     /**
      * @param City $city
      */
@@ -205,11 +219,20 @@ class Application
     private function saveUrls($urls, $cityId)
     {
         foreach ($urls as $url) {
-            $ad = new Ad();
-            $ad->city_id = $cityId;
-            $ad->url = $url;
-            if ($ad->insert() === false) {
-                echo 'URL SAVE ERROR' . PHP_EOL;
+            try {
+                $tmp = Ad::findByUrl($url);
+                if (!empty($tmp)) {
+                    echo 'URL: ' . $url . ' EXISTS' . PHP_EOL;
+                    continue;
+                }
+                $ad = new Ad();
+                $ad->city_id = $cityId;
+                $ad->url = $url;
+                if ($ad->insert() === false) {
+                    echo 'URL SAVE ERROR' . PHP_EOL;
+                }
+            } catch (\Exception $ex) {
+                continue;
             }
         }
     }

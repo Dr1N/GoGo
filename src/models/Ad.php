@@ -34,19 +34,12 @@ class Ad extends Model
 
     public $parsed;
 
-    /**
-     * Find all ads
-     * @param null $limit
-     * @return Ad[]
-     */
-    static public function findAll($limit = null)
+    static public function findByUrl($url)
     {
-        $ads = [];
-        $table = self::getTableRecords($limit);
-        foreach ($table as $item) {
-            $ads[] = self::createAdFromResult($item);
-        }
-        return $ads;
+        Application::$db->where('url', $url);
+        $ad = Application::$db->getOne(self::$tableName);
+
+        return self::createObjectFromArray($ad);
     }
 
     static public function findLastAdInCity(City $city)
@@ -56,38 +49,21 @@ class Ad extends Model
 
         Application::$db->where('city_id', $city->id);
         Application::$db->where('date', $maxDate[0]);
-        $lastAd = Application::$db->getOne(static::$tableName);
+        $lastAd = Application::$db->getOne(self::$tableName);
 
-        return static::createAdFromResult($lastAd);
+        return self::createObjectFromArray($lastAd);
     }
-
-    /**
-     * @param $cityId
-     * @return Ad[]
-     */
+    
     static public function findUnparsedAd($cityId)
     {
         $result = [];
         Application::$db->where('city_id', $cityId);
         Application::$db->where('parsed', null, 'IS');
-        $ads = Application::$db->get(static::$tableName);
+        $ads = Application::$db->get(self::$tableName);
         foreach ($ads as $ad) {
-            $result[] = self::createAdFromResult($ad);
+            $result[] = self::createObjectFromArray($ad);
         }
 
         return $result;
-    }
-
-    static public function createAdFromResult($result)
-    {
-        if (empty($result)) {
-            return null;
-        }
-        $ad = new Ad();
-        foreach ($result as $field => $value) {
-            $ad->$field = $value;
-        }
-
-        return $ad;
     }
 }

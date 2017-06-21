@@ -9,12 +9,8 @@ class Model
     /**
      * @var string
      */
-    public static $tableName;
+    static public  $tableName;
 
-    /**
-     * Insert AD
-     * @return false|integer
-     */
     public function insert()
     {
         if (!$this->validate()) {
@@ -63,11 +59,38 @@ class Model
         return true;
     }
 
-    /**
-     * Return table as array
-     * @param null $limit
-     * @return array
-     */
+    static public function findAll($limit = null)
+    {
+        $models = [];
+        $table = static::getTableRecords($limit);
+        foreach ($table as $item) {
+            $models[] = static::createObjectFromArray($item);
+        }
+        return $models;
+    }
+    
+    static public function findOne($id)
+    {
+         Application::$db->where('id', $id);
+         $result = Application::$db->getOne(static::$tableName);
+        
+         return static::createObjectFromArray($result);
+    }
+
+    static public function createObjectFromArray($array)
+    {
+        if (empty($array)) return null;
+
+        $model = new static();
+        foreach ($array as $field => $value) {
+            if (property_exists(static::class, $field)) {
+                $model->$field = $value;
+            }
+        }
+
+        return $model;
+    }
+
     static public function getTableRecords($limit = null)
     {
         if ($limit !== null && $limit > 0) {

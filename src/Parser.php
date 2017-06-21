@@ -67,7 +67,7 @@ class Parser
         $result = [];
         $adsCount = self::getAdsCount($url);
         $pages = ceil($adsCount / self::ADS_PER_PAGE);
-        self::logParsing('FIND: ' . $pages . ' Pages');
+        echo 'FIND: ' . $pages . ' Pages' . PHP_EOL;
         for ($page = 1; $page <= $pages; $page++) {
             echo 'Page: ' . $page;
             $currentUrl = $url . self::CATEGORY;
@@ -78,8 +78,10 @@ class Parser
             list($urls, $isContinue) = self::getUrlsFromPage($currentUrl, $lastUrl);
             $result = array_merge($result, $urls);
             if (!$isContinue) break;
+            //TODO
+            break;
         }
-        self::logParsing('FIND: ' . count($result) . ' Urls');
+        echo 'FIND: ' . count($result) . ' Urls' . PHP_EOL;
 
         return $result;
     }
@@ -121,7 +123,7 @@ class Parser
             self::logParsing('Can\'t find ad urls on page');
             self::logParsing($ex->getMessage());
         }
-        self::logParsing('URLs on Page: ' . count($result));
+        echo 'URLs on Page: ' . count($result) . PHP_EOL;
 
         return [$result, true];
     }
@@ -130,7 +132,7 @@ class Parser
     {
         $result = [];
         try {
-            self::logParsing('AD URL: ' . $url);
+            echo 'AD URL: ' . $url . PHP_EOL;
             $document = self::getDocument($url);
             if ($document === null) return $result;
             //Url
