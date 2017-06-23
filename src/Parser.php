@@ -175,7 +175,7 @@ class Parser
                 $textDiv = $document->find('div[style=margin-top: 15px; text-align: left; width: 100%; color: #2a2a2a; font-size: 14px;]');
                 if (count($textDiv) != 0) {
                     if (preg_match('/(.*)\s*<div/i', $textDiv[0]->innerHtml(), $matches)) {
-                        $result['text'] = trim($matches[1]);
+                        $result['text'] = strip_tags(trim($matches[1]));
                     }
                     //Phones
                     $phones = $textDiv[0]->find('span');
