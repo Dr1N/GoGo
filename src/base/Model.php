@@ -54,6 +54,13 @@ class Model
         return false;
     }
 
+    public function delete()
+    {
+        Application::$db->where('id', $this->id);
+
+        return Application::$db->delete(static::$tableName);
+    }
+
     public function validate()
     {
         return true;

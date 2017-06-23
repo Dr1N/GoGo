@@ -191,7 +191,10 @@ class Application
                     $fileName = array_pop(explode('/', $image));
                     $fullName = 'images' . DIRECTORY_SEPARATOR . $fileName;
                     if (!file_exists($fullName)) {
-                        file_put_contents($fullName, file_get_contents($imageModel->url));
+                        @$fileContent = file_get_contents($imageModel->url);
+                        if ($fileContent != false) {
+                            file_put_contents($fullName, $fileContent);
+                        }
                     }
                     $imageModel->filename = $fileName;
                 } catch (\Exception $ex) {
