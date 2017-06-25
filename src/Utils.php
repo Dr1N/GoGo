@@ -3,6 +3,7 @@
 namespace src;
 
 use src\models\Ad;
+use src\models\City;
 use src\models\Image;
 
 class Utils
@@ -39,9 +40,17 @@ class Utils
 
     public function moveImages()
     {
-        $images = Image::findAll();
-        foreach ($images as $image) {
-            
+        $cities = City::findAll();
+        foreach ($cities as $city) {
+            /* @var $city City */
+            $ads = $city->getAds();
+            foreach ($ads as $ad) {
+                /* @var $ad Ad */
+                $images = $ad->getImages();
+                foreach ($images as $image) {
+                    //TODO
+                }
+            }
         }
         
         echo 'DONE!' . PHP_EOL;
