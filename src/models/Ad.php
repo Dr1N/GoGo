@@ -66,4 +66,27 @@ class Ad extends Model
 
         return $result;
     }
+
+    public function getImages()
+    {
+        $result = [];
+        Application::$db->where('ad_id', $this->id);
+        $images = Application::$db->get(Image::$tableName);
+        foreach ($images as $image) {
+            $result[] = Image::createObjectFromArray($image);
+        }
+
+        return $result;
+    }
+
+    public function getCity()
+    {
+        if (empty($this->city_id)) {
+            return null;
+        }
+        Application::$db->where('id', $this->city_id);
+        $result = Application::$db->getOne(City::$tableName);
+
+        return City::createObjectFromArray($result);
+    }
 }
