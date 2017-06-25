@@ -237,6 +237,7 @@ class Application
                     echo 'URL SAVE ERROR' . PHP_EOL;
                 }
             } catch (\Exception $ex) {
+                echo $ex->getMessage() . PHP_EOL;
                 continue;
             }
         }

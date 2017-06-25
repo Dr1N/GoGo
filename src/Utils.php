@@ -36,4 +36,14 @@ class Utils
         }
         echo PHP_EOL . 'Done. Deleted: ' . $cnt . PHP_EOL;
     }
+
+    public function moveImages()
+    {
+        $images = Image::findAll();
+        foreach ($images as $image) {
+            
+        }
+        
+        echo 'DONE!' . PHP_EOL;
+    }
 }

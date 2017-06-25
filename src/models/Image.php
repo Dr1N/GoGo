@@ -3,6 +3,7 @@
 namespace src\models;
 
 use src\base\Model;
+use src\Application;
 
 class Image extends Model
 {
@@ -27,4 +28,15 @@ class Image extends Model
      * @var string
      */
     public $filename;
+
+    public function getAd()
+    {
+        if (empty($this->ad_id)) {
+            return null;
+        }
+        Application::$db->where('id', $this->ad_id);
+        $result = Application::$db->getOne(Ad::$tableName);
+
+        return Ad::createObjectFromArray($result);
+    }
 }
