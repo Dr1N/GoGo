@@ -47,4 +47,16 @@ class City extends Model
 
         return Country::createObjectFromArray($result);
     }
+
+    public function getAds()
+    {
+        $result = [];
+        Application::$db->where('city_id', $this->id);
+        $ads = Application::$db->get(Ad::$tableName);
+        foreach ($ads as $ad) {
+            $result[] = Ad::createObjectFromArray($ad);
+        }
+
+        return $result;
+    }
 }
