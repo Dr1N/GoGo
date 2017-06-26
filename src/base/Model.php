@@ -32,6 +32,16 @@ class Model
         return false;
     }
 
+    static public function multiInsert($data, $keys)
+    {
+        try {
+            return $ids = Application::$db->insertMulti(static::$tableName, $data, $keys);
+        } catch (\Exception $ex) {
+            echo $ex->getMessage() . PHP_EOL;
+            return false;
+        }
+    }
+
     public function save()
     {
         if (!$this->validate()) {

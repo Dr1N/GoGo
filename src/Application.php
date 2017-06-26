@@ -98,32 +98,50 @@ class Application
         $this->parseUrlsForCity($city);
 
         //Ads
-        $unparsedAds = Ad::findUnparsedAd($city->id);
-        foreach ($unparsedAds as $unparsedAd) {
-            /* @var $unparsedAd Ad*/
-            $parsedData = Parser::getAdDataByUrl($unparsedAd->url);
-            if (empty($parsedData)) continue;
-            //AD Model
-            $adId = $this->saveAdModel($unparsedAd, $parsedData);
-            if ($adId === false) {
-                echo 'AD SAVE ERROR!' . PHP_EOL;
-                continue;
+        $offset = 0;
+        $limit = DB_READ_PACKET;
+        while (true) {
+            Application::$db->where('city_id', $city->id);
+            Application::$db->where('parsed', null, 'IS');
+            Application::$db->orderBy('date', 'DESC');
+            $unparsedAds = Ad::findAll($offset, $limit);
+            if (empty($unparsedAds)) break;
+            echo '.';
+            foreach ($unparsedAds as $unparsedAd) {
+                if (self::save($unparsedAd, $city)) {
+                    echo 'SAVED' . PHP_EOL;
+                }
             }
-            //Phone Models
-            if (!empty($parsedData['phones'])) {
-                $this->saveAdPhones($parsedData['phones'], $unparsedAd->id);
-            }
-            
-            //Image Models
-            if (!empty($parsedData['images'])) {
-                $this->saveAdImages($parsedData['images'], $unparsedAd->id, $city);
-            }
-            echo 'SAVED' . PHP_EOL;
+            $offset += $limit;
         }
-        echo 'DONE' . PHP_EOL;
+
+        echo PHP_EOL . 'DONE' . PHP_EOL;
     }
 
-    private function saveAdModel(Ad $model, $parsedData)
+    static private function save(Ad $ad, City $city)
+    {
+        $parsedData = Parser::getAdDataByUrl($ad->url);
+        if (empty($parsedData)) return false;
+        //AD Model
+        $adId = self::saveAdModel($ad, $parsedData);
+        if ($adId === false) {
+            echo 'AD SAVE ERROR!' . PHP_EOL;
+            return false;
+        }
+        //Phone Models
+        if (!empty($parsedData['phones'])) {
+            self::saveAdPhones($parsedData['phones'], $ad->id);
+        }
+
+        //Image Models
+        if (!empty($parsedData['images'])) {
+            self::saveAdImages($parsedData['images'], $ad->id, $city);
+        }
+
+        return true;
+    }
+
+    static private function saveAdModel(Ad $model, $parsedData)
     {
         $model->title = isset($parsedData['title']) ? $parsedData['title'] : null;
         $model->date = isset($parsedData['date']) ? $parsedData['date'] : null;
@@ -141,7 +159,7 @@ class Application
      * @param $phones array
      * @param $adId integer
      */
-    private function saveAdPhones($phones, $adId)
+    static private function saveAdPhones($phones, $adId)
     {
         foreach ($phones as $phone) {
             $existsPhone = Phone::findByPhone($phone);
@@ -177,8 +195,15 @@ class Application
      * @param $adId
      * @param $city City
      */
-    private function saveAdImages($images, $adId, $city)
+    static private function saveAdImages($images, $adId, $city)
     {
+        $dirName = 'c' . $city->id;
+        if (!is_dir('images' . DIRECTORY_SEPARATOR . $dirName)) {
+            if (!mkdir('images' . DIRECTORY_SEPARATOR . $dirName)) {
+                echo "Can't create directory [$dirName]" . PHP_EOL;
+                return;
+            }
+        }
         foreach ($images as $image) {
             //Model
             $imageModel = new Image();
@@ -188,7 +213,6 @@ class Application
             //File
             if (SAVE_IMAGE) {
                 try {
-                    $dirName = 'c' . $city->id;
                     $fileName = array_pop(explode('/', $image));
                     $fullName = 'images' . DIRECTORY_SEPARATOR . $dirName . DIRECTORY_SEPARATOR . $fileName;
                     if (!file_exists($fullName)) {
@@ -230,22 +254,17 @@ class Application
         foreach ($urls as $url) {
             $cnt++;
             $data[] = [$cityId, $url];
-            if ($cnt % 100 === 0) {
-                if (!self::multiInsert(Ad::$tableName, $data, $keys)) {
+            if ($cnt % DB_WRITE_PACKET === 0) {
+                if (!Ad::multiInsert($data, $keys)) {
                     echo 'insert failed: ' . Application::$db->getLastError() . PHP_EOL;
                 }
                 $data = [];
             }
         }
-    }
-
-    static private function multiInsert($table, $data, $keys)
-    {
-        try {
-            return $ids = Application::$db->insertMulti($table, $data, $keys);
-        } catch (\Exception $ex) {
-            echo $ex->getMessage() . PHP_EOL;
-            return false;
+        if (!empty($data)) {
+            if (!Ad::multiInsert($data, $keys)) {
+                echo 'insert failed: ' . Application::$db->getLastError() . PHP_EOL;
+            }
         }
     }
 }

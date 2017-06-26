@@ -81,7 +81,7 @@ class Parser
         }
         echo 'FIND: ' . count($result) . ' Urls' . PHP_EOL;
 
-        return $result;
+        return array_unique($result);
     }
 
     static public function getAdsCount($url)
@@ -103,7 +103,7 @@ class Parser
     {
         $result = [];
         try {
-            $document = new Document($url, true);
+            $document = self::getDocument($url);
             $contentDiv = $document->find('div.main-content');
             if (count($contentDiv) != 0) {
                 $links = $contentDiv[0]->find('a.link_post');

@@ -54,19 +54,6 @@ class Ad extends Model
         return self::createObjectFromArray($lastAd);
     }
     
-    static public function findUnparsedAd($cityId)
-    {
-        $result = [];
-        Application::$db->where('city_id', $cityId);
-        Application::$db->where('parsed', null, 'IS');
-        $ads = Application::$db->get(self::$tableName);
-        foreach ($ads as $ad) {
-            $result[] = self::createObjectFromArray($ad);
-        }
-
-        return $result;
-    }
-
     public function getImages($offset = null, $limit = null)
     {
         $result = [];
