@@ -43,10 +43,21 @@ class Utils
         $cities = City::findAll();
         foreach ($cities as $city) {
             /* @var $city City */
+            echo 'City:' . $city->name . PHP_EOL;
+            $dirName = 'images' . DIRECTORY_SEPARATOR . 'c' . $city->id;
+            if (!is_dir($dirName)) {
+                if (!mkdir($dirName)) {
+                    echo 'Can\'t create directory' . PHP_EOL;
+                    continue;
+                }
+            }
+            /* @var $city City */
             $ads = $city->getAds();
+            echo 'ADS:' . count($ads) . PHP_EOL;
             foreach ($ads as $ad) {
                 /* @var $ad Ad */
                 $images = $ad->getImages();
+                echo 'Images: ' . count($images) . PHP_EOL;
                 foreach ($images as $image) {
                     //TODO
                 }

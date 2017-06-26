@@ -12,7 +12,8 @@
   "require": {
     "imangazaliev/didom": "1.9.1",
     "guzzlehttp/guzzle": "~6.0",
-    "joshcam/mysqli-database-class": "dev-master"
+    "joshcam/mysqli-database-class": "dev-master",
+    "league/climate": "^3.2"
   },
   "autoload": {
     "psr-0": {
