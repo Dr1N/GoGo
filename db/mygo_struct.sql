@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Хост: 127.0.0.1:3306
--- Время создания: Июн 22 2017 г., 02:19
+-- Время создания: Июн 27 2017 г., 00:11
 -- Версия сервера: 5.5.48
 -- Версия PHP: 5.6.19
 
@@ -29,7 +29,7 @@ SET time_zone = "+00:00";
 CREATE TABLE IF NOT EXISTS `ads` (
   `id` int(11) NOT NULL,
   `city_id` int(11) NOT NULL,
-  `url` varchar(512) NOT NULL,
+  `url` varchar(255) NOT NULL,
   `title` varchar(1024) DEFAULT NULL,
   `date` int(11) DEFAULT NULL,
   `gender` int(1) DEFAULT NULL,
@@ -473,7 +473,9 @@ CREATE TABLE IF NOT EXISTS `phones` (
 -- Индексы таблицы `ads`
 --
 ALTER TABLE `ads`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `url` (`url`),
+  ADD KEY `parsed_inx` (`parsed`,`date`);
 
 --
 -- Индексы таблицы `ad_phone_relation`

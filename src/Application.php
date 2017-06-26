@@ -116,7 +116,7 @@ class Application
             
             //Image Models
             if (!empty($parsedData['images'])) {
-                $this->saveAdImages($parsedData['images'], $unparsedAd->id, $city->url);
+                $this->saveAdImages($parsedData['images'], $unparsedAd->id, $city);
             }
             echo 'SAVED' . PHP_EOL;
         }
@@ -173,30 +173,31 @@ class Application
     }
 
     /**
-     * @param $images array
-     * @param $adId integer
-     * @param $cityUrl string
+     * @param $images
+     * @param $adId
+     * @param $city City
      */
-    private function saveAdImages($images, $adId, $cityUrl)
+    private function saveAdImages($images, $adId, $city)
     {
         foreach ($images as $image) {
             //Model
             $imageModel = new Image();
             $imageModel->ad_id = $adId;
-            $imageModel->url = $cityUrl . substr($image, 2);
+            $imageModel->url = $city->url . substr($image, 2);
             $imageModel->filename = null;
             //File
             if (SAVE_IMAGE) {
                 try {
+                    $dirName = 'c' . $city->id;
                     $fileName = array_pop(explode('/', $image));
-                    $fullName = 'images' . DIRECTORY_SEPARATOR . $fileName;
+                    $fullName = 'images' . DIRECTORY_SEPARATOR . $dirName . DIRECTORY_SEPARATOR . $fileName;
                     if (!file_exists($fullName)) {
                         @$fileContent = file_get_contents($imageModel->url);
                         if ($fileContent != false) {
                             file_put_contents($fullName, $fileContent);
+                            $imageModel->filename = $fileName;
                         }
                     }
-                    $imageModel->filename = $fileName;
                 } catch (\Exception $ex) {
                     echo $ex->getMessage() . PHP_EOL;
                 }
@@ -223,23 +224,28 @@ class Application
 
     private function saveUrls($urls, $cityId)
     {
+        $cnt = 0;
+        $keys = ['city_id', 'url'];
+        $data = [];
         foreach ($urls as $url) {
-            try {
-                $tmp = Ad::findByUrl($url);
-                if (!empty($tmp)) {
-                    echo 'URL: ' . $url . ' EXISTS' . PHP_EOL;
-                    continue;
+            $cnt++;
+            $data[] = [$cityId, $url];
+            if ($cnt % 100 === 0) {
+                if (!self::multiInsert(Ad::$tableName, $data, $keys)) {
+                    echo 'insert failed: ' . Application::$db->getLastError() . PHP_EOL;
                 }
-                $ad = new Ad();
-                $ad->city_id = $cityId;
-                $ad->url = $url;
-                if ($ad->insert() === false) {
-                    echo 'URL SAVE ERROR' . PHP_EOL;
-                }
-            } catch (\Exception $ex) {
-                echo $ex->getMessage() . PHP_EOL;
-                continue;
+                $data = [];
             }
+        }
+    }
+
+    static private function multiInsert($table, $data, $keys)
+    {
+        try {
+            return $ids = Application::$db->insertMulti($table, $data, $keys);
+        } catch (\Exception $ex) {
+            echo $ex->getMessage() . PHP_EOL;
+            return false;
         }
     }
 }

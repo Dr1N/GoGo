@@ -2,13 +2,14 @@
 
 namespace src;
 
+use League\CLImate\CLImate;
 use src\models\Ad;
 use src\models\City;
 use src\models\Image;
 
 class Utils
 {
-    public function removeTags()
+    static public function removeTags()
     {
         $ads = Ad::findAll();
         foreach ($ads as $ad) {
@@ -19,8 +20,8 @@ class Utils
         }
         echo PHP_EOL . 'Done' . PHP_EOL;
     }
-    
-    public function removeEmptyImages()
+
+    static public function removeEmptyImages()
     {
         $cnt = 0;
         $images = Image::findAll();
@@ -38,12 +39,15 @@ class Utils
         echo PHP_EOL . 'Done. Deleted: ' . $cnt . PHP_EOL;
     }
 
-    public function moveImages()
+    static public function moveImages()
     {
+        $client = new CLImate();
         $cities = City::findAll();
+        $cityProgress = $client->progress()->total(count($cities));
         foreach ($cities as $city) {
-            /* @var $city City */
-            echo 'City:' . $city->name . PHP_EOL;
+            /* @var City $city */
+            echo $city->name . PHP_EOL;
+            $cityProgress->advance();
             $dirName = 'images' . DIRECTORY_SEPARATOR . 'c' . $city->id;
             if (!is_dir($dirName)) {
                 if (!mkdir($dirName)) {
@@ -51,16 +55,28 @@ class Utils
                     continue;
                 }
             }
-            /* @var $city City */
-            $ads = $city->getAds();
-            echo 'ADS:' . count($ads) . PHP_EOL;
-            foreach ($ads as $ad) {
-                /* @var $ad Ad */
-                $images = $ad->getImages();
-                echo 'Images: ' . count($images) . PHP_EOL;
-                foreach ($images as $image) {
-                    //TODO
+            $offset = 0;
+            $limit = 1000;
+            while (true) {
+                $ads = $city->getAds($offset, $limit);
+                if (empty($ads)) break;
+                echo '.';
+                foreach ($ads as $ad) {
+                    $images = $ad->getImages();
+                    foreach ($images as $image) {
+                        $fullName = 'images' . DIRECTORY_SEPARATOR . $image->filename;
+                        if (file_exists($fullName)) {
+                            $oldName = realpath($fullName);
+                            $newName = realpath($dirName . DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $image->filename;
+                            if (!rename($oldName, $newName)) {
+                                echo 'Rename Error!' . PHP_EOL;
+                                die();
+                            }
+                        }
+                    }
                 }
+                $offset += $limit;
+                echo PHP_EOL;
             }
         }
         

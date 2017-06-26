@@ -67,11 +67,11 @@ class Ad extends Model
         return $result;
     }
 
-    public function getImages()
+    public function getImages($offset = null, $limit = null)
     {
         $result = [];
         Application::$db->where('ad_id', $this->id);
-        $images = Application::$db->get(Image::$tableName);
+        $images = Image::findAll($offset, $limit);
         foreach ($images as $image) {
             $result[] = Image::createObjectFromArray($image);
         }

@@ -9,16 +9,16 @@
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
-            "version": "dev-master",
+            "version": "6.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "1739e8b94e058421d4da8b66887c52ee523f7d45"
+                "reference": "f4db5a78a5ea468d4831de7f0bf9d9415e348699"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/1739e8b94e058421d4da8b66887c52ee523f7d45",
-                "reference": "1739e8b94e058421d4da8b66887c52ee523f7d45",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/f4db5a78a5ea468d4831de7f0bf9d9415e348699",
+                "reference": "f4db5a78a5ea468d4831de7f0bf9d9415e348699",
                 "shasum": ""
             },
             "require": {
@@ -70,7 +70,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2017-05-15 08:45:24"
+            "time": "2017-06-22 18:50:49"
         },
         {
             "name": "guzzlehttp/promises",
@@ -129,12 +129,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "8882b252f802cae96f0315c3608faef95af6a7f2"
+                "reference": "526d8ef63e8701e02216b621e4a3a16085e2286f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/8882b252f802cae96f0315c3608faef95af6a7f2",
-                "reference": "8882b252f802cae96f0315c3608faef95af6a7f2",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/526d8ef63e8701e02216b621e4a3a16085e2286f",
+                "reference": "526d8ef63e8701e02216b621e4a3a16085e2286f",
                 "shasum": ""
             },
             "require": {
@@ -186,7 +186,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2017-05-09 09:16:44"
+            "time": "2017-06-19 13:30:27"
         },
         {
             "name": "imangazaliev/didom",
@@ -240,12 +240,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/joshcam/PHP-MySQLi-Database-Class.git",
-                "reference": "240a4fd51da09d428da4b60904a3fa919445808b"
+                "reference": "14544ff785f3b81e17356517fe8876f888c310f3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/joshcam/PHP-MySQLi-Database-Class/zipball/240a4fd51da09d428da4b60904a3fa919445808b",
-                "reference": "240a4fd51da09d428da4b60904a3fa919445808b",
+                "url": "https://api.github.com/repos/joshcam/PHP-MySQLi-Database-Class/zipball/14544ff785f3b81e17356517fe8876f888c310f3",
+                "reference": "14544ff785f3b81e17356517fe8876f888c310f3",
                 "shasum": ""
             },
             "require": {
@@ -277,7 +277,7 @@
                 }
             ],
             "description": "PHP MySQL Wrapper and object mapper which utilizes MySQLi and prepared statements",
-            "time": "2017-03-18 11:45:58"
+            "time": "2017-06-20 22:01:46"
         },
         {
             "name": "league/climate",

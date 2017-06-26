@@ -32,14 +32,14 @@ class Country extends Model
         return self::createObjectFromArray($result);
     }
 
-    public function getCities()
+    public function getCities($offset = null, $limit = null)
     {
         if (empty($this->id)) {
             return null;
         }
         $result = [];
         Application::$db->where('country_id', $this->id);
-        $queryResult = Application::$db->get(City::$tableName);
+        $queryResult = City::findAll($offset = null, $limit = null);
         foreach ($queryResult as $item) {
             $result[] = City::createObjectFromArray($item);
         }

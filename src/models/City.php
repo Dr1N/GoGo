@@ -42,17 +42,16 @@ class City extends Model
         if (empty($this->country_id)) {
             return null;
         }
-        Application::$db->where('id', $this->country_id);
-        $result = Application::$db->getOne(Country::$tableName);
+        $result = Country::findOne($this->country_id);
 
-        return Country::createObjectFromArray($result);
+        return $result;
     }
 
-    public function getAds()
+    public function getAds($offset = null, $limit = null)
     {
         $result = [];
         Application::$db->where('city_id', $this->id);
-        $ads = Application::$db->get(Ad::$tableName);
+        $ads = Ad::findAll($offset, $limit);
         foreach ($ads as $ad) {
             $result[] = Ad::createObjectFromArray($ad);
         }

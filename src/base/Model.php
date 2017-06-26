@@ -66,10 +66,10 @@ class Model
         return true;
     }
 
-    static public function findAll($limit = null)
+    static public function findAll($offset = null, $limit = null)
     {
         $models = [];
-        $table = static::getTableRecords($limit);
+        $table = static::getTableRecords($offset, $limit);
         foreach ($table as $item) {
             $models[] = static::createObjectFromArray($item);
         }
@@ -98,10 +98,10 @@ class Model
         return $model;
     }
 
-    static public function getTableRecords($limit = null)
+    static public function getTableRecords($offset = null, $limit = null)
     {
-        if ($limit !== null && $limit > 0) {
-            $queryResult = Application::$db->get(static::$tableName, $limit);
+        if ($limit !== null && $offset !== null) {
+            $queryResult = Application::$db->get(static::$tableName, [$offset, $limit]);
         } else {
             $queryResult = Application::$db->get(static::$tableName);
         }

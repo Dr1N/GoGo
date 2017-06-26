@@ -34,8 +34,7 @@ class Image extends Model
         if (empty($this->ad_id)) {
             return null;
         }
-        Application::$db->where('id', $this->ad_id);
-        $result = Application::$db->getOne(Ad::$tableName);
+        $result = Ad::findOne($this->ad_id);
 
         return Ad::createObjectFromArray($result);
     }
