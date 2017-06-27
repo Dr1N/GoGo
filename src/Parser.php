@@ -6,6 +6,7 @@ use DiDom\Document;
 use DiDom\Element;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use League\CLImate\CLImate;
 use src\models\Ad;
 use src\models\Country;
 
@@ -14,7 +15,7 @@ class Parser
     const CATEGORY = 'view_subsection.php?id_subsection=146';
     const SEARCH_PARAMS = 'search=&page=';
     const ADS_PER_PAGE = 50;
-    const ATTEMPT_DOWNLOAD = 3;
+    const ATTEMPT_DOWNLOAD = 2;
     const ATTEMPT_PAUSE = 1;
 
     /**
@@ -62,33 +63,45 @@ class Parser
         return $cities;
     }
 
+    /**
+     * Get AD Urls for city
+     * @param $url string city url
+     * @param null $lastUrl string last ad url in base
+     * @return array
+     */
     static public function getAdUrls($url, $lastUrl = null)
     {
         $result = [];
         $adsCount = self::getAdsCount($url);
-        $pages = ceil($adsCount / self::ADS_PER_PAGE);
+        $pages = (int)ceil($adsCount / self::ADS_PER_PAGE);
         echo 'FIND: ' . $pages . ' Pages' . PHP_EOL;
+        $progress = (new CLImate())->progress()->total($pages);
         for ($page = 1; $page <= $pages; $page++) {
-            echo 'Page: ' . $page;
             $currentUrl = $url . self::CATEGORY;
             if ($page > 1) {
                 $currentUrl = $currentUrl . '?' . self::SEARCH_PARAMS . $page;
             }
-            echo "\tUrl: " . $currentUrl . PHP_EOL;
-            list($urls, $isContinue) = self::getUrlsFromPage($currentUrl, $lastUrl);
+            $document = self::getDocument($currentUrl);
+            list($urls, $isContinue) = self::getUrlsFromPage($document, $lastUrl);
             $result = array_merge($result, $urls);
-            if (!$isContinue) break;
+            if (!$isContinue) {
+                $progress->current($pages);
+                break;
+            }
+            $progress->current($page);
         }
         echo 'FIND: ' . count($result) . ' Urls' . PHP_EOL;
 
         return array_unique($result);
     }
 
-    static public function getUrlsFromPage($url, $lastUrl)
+    static public function getUrlsFromPage(Document $document, $lastUrl)
     {
         $result = [];
+        if ($document == null) {
+            return [$result, true];
+        }
         try {
-            $document = self::getDocument($url);
             $contentDiv = $document->find('div.main-content');
             if (count($contentDiv) != 0) {
                 $links = $contentDiv[0]->find('a.link_post');
@@ -106,7 +119,6 @@ class Parser
             self::logParsing('Can\'t find ad urls on page');
             self::logParsing($ex->getMessage());
         }
-        echo 'URLs on Page: ' . count($result) . PHP_EOL;
 
         return [$result, true];
     }
@@ -130,7 +142,6 @@ class Parser
     {
         $result = [];
         try {
-            echo 'AD URL: ' . $url . PHP_EOL;
             $document = self::getDocument($url);
             if ($document === null) return $result;
             //Url
@@ -238,7 +249,7 @@ class Parser
 
     /**
      * @param $url
-     * @return array
+     * @return Document|null
      */
     private static function getDocument($url)
     {

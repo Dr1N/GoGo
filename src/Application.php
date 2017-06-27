@@ -18,8 +18,6 @@ class Application
      */
     public static $db;
 
-    public static $climate;
-
     public function __construct()
     {
         try {
@@ -31,7 +29,6 @@ class Application
                 'port' => 3306,
                 'charset' => 'utf8'
             ]);
-            self::$climate = new CLImate();
         } catch (\Exception $ex) {
             echo 'ERROR: ' . $ex->getMessage() . PHP_EOL;
         }
@@ -114,21 +111,17 @@ class Application
         $cnt = 0;
         while (true) {
             $query = "SELECT * FROM " . Ad::$tableName . " WHERE `parsed` IS NULL LIMIT $offset, $limit";
-            Application::log($query);
             $unparsedAds = Ad::rawQuery($query);
-            Application::log(count($unparsedAds));
-            Application::log(empty($unparsedAds) ? 'Empty' : 'Not Empty');
             if (empty($unparsedAds)) {
-                Application::log('Exit!');
                 break;
             }
+            $progress = (new CLImate())->progress()->total(count($unparsedAds));
             foreach ($unparsedAds as $unparsedAd) {
                 if (self::save($unparsedAd, $city)) {
-                    echo 'SAVED' . PHP_EOL;
+                    $progress->advance();
                     $cnt++;
                 }
             }
-            $offset += $limit;
         }
 
         echo PHP_EOL . 'DONE ( ' . $cnt . ' )' . PHP_EOL;
