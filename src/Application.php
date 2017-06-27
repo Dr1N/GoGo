@@ -18,6 +18,8 @@ class Application
      */
     public static $db;
 
+    public static $climate;
+
     public function __construct()
     {
         try {
@@ -29,9 +31,16 @@ class Application
                 'port' => 3306,
                 'charset' => 'utf8'
             ]);
+            self::$climate = new CLImate();
         } catch (\Exception $ex) {
             echo 'ERROR: ' . $ex->getMessage() . PHP_EOL;
         }
+    }
+
+    static public function log($message, $category = 'app')
+    {
+        echo $message . PHP_EOL;
+        @file_put_contents("logs/$category.log", date('d.m.Y H:i:s') . "\t" . $message . PHP_EOL, FILE_APPEND);
     }
 
     public function run($country = null, $city = null)
@@ -96,26 +105,33 @@ class Application
     private function parseAdsFromCity(City $city)
     {
         //Urls
-        $urls = $this->parseUrlsForCity($city);
-        $this->saveUrls($urls, $city->id);
+        $urls = $this->parseAdUrlsForCity($city);
+        $this->saveAdUrls($urls, $city->id);
 
         //Ads
         $offset = 0;
         $limit = DB_READ_PACKET;
+        $cnt = 0;
         while (true) {
-            Application::$db->where('city_id', $city->id);
-            Application::$db->where('parsed', null, 'IS');
-            $unparsedAds = Ad::findAll($offset, $limit);
-            if (empty($unparsedAds)) break;
+            $query = "SELECT * FROM " . Ad::$tableName . " WHERE `parsed` IS NULL LIMIT $offset, $limit";
+            Application::log($query);
+            $unparsedAds = Ad::rawQuery($query);
+            Application::log(count($unparsedAds));
+            Application::log(empty($unparsedAds) ? 'Empty' : 'Not Empty');
+            if (empty($unparsedAds)) {
+                Application::log('Exit!');
+                break;
+            }
             foreach ($unparsedAds as $unparsedAd) {
                 if (self::save($unparsedAd, $city)) {
                     echo 'SAVED' . PHP_EOL;
+                    $cnt++;
                 }
             }
             $offset += $limit;
         }
 
-        echo PHP_EOL . 'DONE' . PHP_EOL;
+        echo PHP_EOL . 'DONE ( ' . $cnt . ' )' . PHP_EOL;
     }
 
     static private function save(Ad $ad, City $city)
@@ -232,7 +248,7 @@ class Application
         }
     }
 
-    private function parseUrlsForCity(City $city)
+    private function parseAdUrlsForCity(City $city)
     {
         $url = $city->url;
         $lastAd = Ad::findLastAdInCity($city);
@@ -244,7 +260,7 @@ class Application
         return $urlList;
     }
 
-    private function saveUrls($urls, $cityId)
+    private function saveAdUrls($urls, $cityId)
     {
         $climate = new CLImate();
         $climate->clear();

@@ -93,6 +93,20 @@ class Model
         
          return static::createObjectFromArray($result);
     }
+    
+    static public function rawQuery($query)
+    {
+        $result = [];
+        $queryResult = Application::$db->rawQuery($query);
+        if (empty($queryResult)) {
+            return $result;
+        }
+        foreach ($queryResult as $item) {
+            $result[] = static::createObjectFromArray($item);
+        }
+
+        return $result;
+    }
 
     static public function createObjectFromArray($array)
     {

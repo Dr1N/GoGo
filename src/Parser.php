@@ -84,21 +84,6 @@ class Parser
         return array_unique($result);
     }
 
-    static public function getAdsCount($url)
-    {
-        try {
-            $document = new Document($url . self::CATEGORY, true);
-            $spans = $document->find('span[style=font-size: 14px;]');
-            if (count($spans) != 0) {
-                return (int)$spans[0]->text();
-            }
-        } catch (\Exception $ex) {
-            self::logParsing('Can\'t find ads counter');
-            self::logParsing($ex->getMessage());
-        }
-        return 0;
-    }
-
     static public function getUrlsFromPage($url, $lastUrl)
     {
         $result = [];
@@ -124,6 +109,21 @@ class Parser
         echo 'URLs on Page: ' . count($result) . PHP_EOL;
 
         return [$result, true];
+    }
+
+    static public function getAdsCount($url)
+    {
+        try {
+            $document = new Document($url . self::CATEGORY, true);
+            $spans = $document->find('span[style=font-size: 14px;]');
+            if (count($spans) != 0) {
+                return (int)$spans[0]->text();
+            }
+        } catch (\Exception $ex) {
+            self::logParsing('Can\'t find ads counter');
+            self::logParsing($ex->getMessage());
+        }
+        return 0;
     }
 
     static public function getAdDataByUrl($url)
@@ -230,16 +230,10 @@ class Parser
 
         return $result;
     }
-
-    /**
-     * Logging parser errors
-     * @param $error
-     * @param string $filename
-     */
-    static private function logParsing($error, $filename = 'parser.log')
+    
+    static private function logParsing($error)
     {
-        echo $error . PHP_EOL;
-        file_put_contents("logs/$filename", date('d.m.Y H:i:s') . "\t" . $error . PHP_EOL, FILE_APPEND);
+        Application::log($error, 'parser');
     }
 
     /**
