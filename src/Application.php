@@ -2,6 +2,7 @@
 
 namespace src;
 
+use League\CLImate\CLImate;
 use MysqliDb;
 use src\models\Ad;
 use src\models\AdPhoneRelation;
@@ -95,7 +96,8 @@ class Application
     private function parseAdsFromCity(City $city)
     {
         //Urls
-        $this->parseUrlsForCity($city);
+        $urls = $this->parseUrlsForCity($city);
+        $this->saveUrls($urls, $city->id);
 
         //Ads
         $offset = 0;
@@ -103,10 +105,8 @@ class Application
         while (true) {
             Application::$db->where('city_id', $city->id);
             Application::$db->where('parsed', null, 'IS');
-            Application::$db->orderBy('date', 'DESC');
             $unparsedAds = Ad::findAll($offset, $limit);
             if (empty($unparsedAds)) break;
-            echo '.';
             foreach ($unparsedAds as $unparsedAd) {
                 if (self::save($unparsedAd, $city)) {
                     echo 'SAVED' . PHP_EOL;
@@ -232,9 +232,6 @@ class Application
         }
     }
 
-    /**
-     * @param City $city
-     */
     private function parseUrlsForCity(City $city)
     {
         $url = $city->url;
@@ -243,28 +240,40 @@ class Application
             echo 'LAST AD: ' . $lastAd->url . PHP_EOL;
         }
         $urlList = Parser::getAdUrls($url, $lastAd->url);
-        $this->saveUrls($urlList, $city->id);
+
+        return $urlList;
     }
 
     private function saveUrls($urls, $cityId)
     {
+        $climate = new CLImate();
+        $climate->clear();
+        if (count($urls) == 0) {
+            $progress = $climate->progress(100);
+            $progress->current(100);
+            return;
+        }
+
+        $progress = $climate->progress(count($urls));
         $cnt = 0;
         $keys = ['city_id', 'url'];
         $data = [];
         foreach ($urls as $url) {
             $cnt++;
             $data[] = [$cityId, $url];
-            if ($cnt % DB_WRITE_PACKET === 0) {
+            if ($cnt % DB_WRITE_PACKET == 0) {
                 if (!Ad::multiInsert($data, $keys)) {
                     echo 'insert failed: ' . Application::$db->getLastError() . PHP_EOL;
                 }
                 $data = [];
             }
+            $progress->advance();
         }
         if (!empty($data)) {
             if (!Ad::multiInsert($data, $keys)) {
                 echo 'insert failed: ' . Application::$db->getLastError() . PHP_EOL;
             }
         }
+        $progress->current(count($urls));
     }
 }

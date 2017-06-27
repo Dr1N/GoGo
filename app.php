@@ -8,8 +8,9 @@ require_once 'vendor/autoload.php';
 use src\Application;
 
 $app = new Application();
-$app->clear();
-//die();
+if (DB_CLEAR) {
+    $app->clear();
+}
 if ($argc == 2) {
     if ($argv[1] == 'cities') {
         $app->parseCities();
