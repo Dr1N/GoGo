@@ -115,6 +115,7 @@ class Application
             if (empty($unparsedAds)) {
                 break;
             }
+            echo 'URLS: ' . count($unparsedAds) . PHP_EOL;
             $progress = (new CLImate())->progress()->total(count($unparsedAds));
             foreach ($unparsedAds as $unparsedAd) {
                 if (self::save($unparsedAd, $city)) {
@@ -284,5 +285,6 @@ class Application
             }
         }
         $progress->current(count($urls));
+        echo 'TOTAL: ' . count($urls) . PHP_EOL;
     }
 }

@@ -264,7 +264,6 @@ class Parser
             }
         }
         //Guzzle
-        echo 'GUZZLE' . PHP_EOL;
         try {
             $client = new Client();
             $response = $client->request('GET', $url);
