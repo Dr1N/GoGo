@@ -260,7 +260,8 @@ class Application
             //File
             if (SAVE_IMAGE) {
                 try {
-                    $fileName = array_pop(explode('/', $image));
+                    $tmp = explode('/', $image);
+                    $fileName = array_pop($tmp);
                     $fullName = 'images' . DIRECTORY_SEPARATOR . $dirName . DIRECTORY_SEPARATOR . $fileName;
                     if (!file_exists($fullName)) {
                         @$fileContent = file_get_contents($imageModel->url);
