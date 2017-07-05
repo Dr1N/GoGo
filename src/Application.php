@@ -48,8 +48,13 @@ class Application
 
     public function run($country = null, $city = null)
     {
+        $os = php_uname();
         if (!empty($country)) {
-            $countryModel = Country::findByName(iconv('CP1251', 'UTF-8', $country));
+            if (stripos($os, 'windows') !== false) {
+                $countryModel = Country::findByName(iconv('CP1251', 'UTF-8', $country));
+            } else {
+                $countryModel = Country::findByName($country);
+            }
             if ($countryModel != null) {
                 self::parseAdsFromCountry($countryModel);
             } else {
@@ -57,7 +62,11 @@ class Application
             }
         }
         if (!empty($city)) {
-            $cityModel = City::findByName(iconv('CP1251', 'UTF-8', $city));
+            if (stripos($os, 'windows') !== false) {
+                $cityModel = City::findByName(iconv('CP1251', 'UTF-8', $city));
+            } else {
+                $cityModel = City::findByName($city);
+            }
             if ($cityModel != null) {
                 self::parseAdsFromCity($cityModel);
             } else {
