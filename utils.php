@@ -8,4 +8,5 @@ require_once 'vendor/autoload.php';
 use src\Application;
 
 $app = new Application();
-\src\Utils::run();
+
+echo 'Hello!' . PHP_EOL;
