@@ -2,8 +2,14 @@
 
 namespace src;
 
+use DiDom\Document;
+use GuzzleHttp\Client;
+use GuzzleHttp\Pool;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use League\CLImate\CLImate;
 use MysqliDb;
+use src\base\Model;
 use src\models\Ad;
 use src\models\AdPhoneRelation;
 use src\models\City;
@@ -45,7 +51,7 @@ class Application
         if (!empty($country)) {
             $countryModel = Country::findByName(iconv('CP1251', 'UTF-8', $country));
             if ($countryModel != null) {
-                $this->parseAdsFromCountry($countryModel);
+                self::parseAdsFromCountry($countryModel);
             } else {
                 echo 'INCORRECT COUNTRY: ' . $country . PHP_EOL;
             }
@@ -53,7 +59,7 @@ class Application
         if (!empty($city)) {
             $cityModel = City::findByName(iconv('CP1251', 'UTF-8', $city));
             if ($cityModel != null) {
-                $this->parseAdsFromCity($cityModel);
+                self::parseAdsFromCity($cityModel);
             } else {
                 echo 'INCORRECT CITY: ' . $city . PHP_EOL;
             }
@@ -90,48 +96,64 @@ class Application
         }
         echo 'Parsing Done!' . PHP_EOL;
     }
-    
-    private function parseAdsFromCountry(Country $country)
+
+    static private function parseAdsFromCountry(Country $country)
     {
         $cities = $country->getCities();
         foreach ($cities as $city) {
-            $this->parseAdsFromCity($city);
+            self::parseAdsFromCity($city);
         }
     }
 
-    private function parseAdsFromCity(City $city)
+    static private function parseAdsFromCity(City $city)
     {
         //Urls
-        $urls = $this->parseAdUrlsForCity($city);
-        $this->saveAdUrls($urls, $city->id);
+        $urls = self::parseAdUrls($city);
+        self::saveAdUrls($urls, $city->id);
 
         //Ads
         $offset = 0;
         $limit = DB_READ_PACKET;
-        $cnt = 0;
+
         while (true) {
             $query = "SELECT * FROM " . Ad::$tableName . " WHERE `parsed` IS NULL LIMIT $offset, $limit";
             $unparsedAds = Ad::rawQuery($query);
             if (empty($unparsedAds)) {
                 break;
             }
-            echo 'URLS: ' . count($unparsedAds) . PHP_EOL;
+            echo 'UNPARSED URLS: ' . count($unparsedAds) . PHP_EOL;
             $progress = (new CLImate())->progress()->total(count($unparsedAds));
-            foreach ($unparsedAds as $unparsedAd) {
-                if (self::save($unparsedAd, $city)) {
+            //Request
+            $requests = function ($total) use ($unparsedAds, $progress) {
+                for ($i = 0; $i < $total; $i++) {
                     $progress->advance();
-                    $cnt++;
+                    yield new Request('GET', $unparsedAds[$i]->url);
                 }
-            }
+            };
+            //Pool
+            $client = new Client();
+            $pool = new Pool($client, $requests(count($unparsedAds)), [
+                'concurrency' => GZ_CONCURRENT,
+                'fulfilled' => function (Response $response, $index) use ($unparsedAds, $city) {
+                    $document = new Document($response->getBody()->getContents());
+                    $parsedData = Parser::getAdDataFromDocument($document, $unparsedAds[$index]->url);
+                    if (!self::save($parsedData, $unparsedAds[$index], $city)) {
+                        Application::log('SAVE ERROR: ' . $unparsedAds[$index]->url);
+                    }
+                },
+                'rejected' => function ($reason, $index) {
+                    echo $index . ' Fail!'  . $reason . PHP_EOL;
+                },
+            ]);
+            $promise = $pool->promise();
+            $promise->wait();
         }
 
-        echo PHP_EOL . 'DONE ( ' . $cnt . ' )' . PHP_EOL;
+        echo PHP_EOL . 'DONE' . PHP_EOL;
     }
 
-    static private function save(Ad $ad, City $city)
+    static private function save($parsedData, Ad $ad, City $city)
     {
-        $parsedData = Parser::getAdDataByUrl($ad->url);
-        if (empty($parsedData)) return false;
         //AD Model
         $adId = self::saveAdModel($ad, $parsedData);
         if ($adId === false) {
@@ -242,49 +264,40 @@ class Application
         }
     }
 
-    private function parseAdUrlsForCity(City $city)
+    static private function parseAdUrls(City $city)
     {
-        $url = $city->url;
-        $lastAd = Ad::findLastAdInCity($city);
-        if ($lastAd != null) {
-            echo 'LAST AD: ' . $lastAd->url . PHP_EOL;
-        }
-        $urlList = Parser::getAdUrls($url, $lastAd->url);
+        $urlList = Parser::getAdUrls($city);
 
         return $urlList;
     }
 
-    private function saveAdUrls($urls, $cityId)
+    static private function saveAdUrls($urls, $cityId)
     {
         $climate = new CLImate();
         $climate->clear();
         if (count($urls) == 0) {
-            $progress = $climate->progress(100);
-            $progress->current(100);
+            $climate->progress(100)->current(100);
             return;
         }
 
+        //TODO optimization
+        //New Urls
+        $allUrls = Model::rawQueryValue('SELECT `url` FROM `ads` WHERE `city_id`=' . $cityId);
+        $urlsForSave = array_diff($urls, $allUrls);
+
+        //Save
         $progress = $climate->progress(count($urls));
         $cnt = 0;
-        $keys = ['city_id', 'url'];
-        $data = [];
-        foreach ($urls as $url) {
-            $cnt++;
-            $data[] = [$cityId, $url];
-            if ($cnt % DB_WRITE_PACKET == 0) {
-                if (!Ad::multiInsert($data, $keys)) {
-                    echo 'insert failed: ' . Application::$db->getLastError() . PHP_EOL;
-                }
-                $data = [];
-            }
+        foreach ($urlsForSave as $url) {
             $progress->advance();
-        }
-        if (!empty($data)) {
-            if (!Ad::multiInsert($data, $keys)) {
-                echo 'insert failed: ' . Application::$db->getLastError() . PHP_EOL;
+            $ad = new Ad();
+            $ad->city_id = $cityId;
+            $ad->url = $url;
+            if ($ad->insert()) {
+                $cnt++;
             }
         }
-        $progress->current(count($urls));
-        echo 'TOTAL: ' . count($urls) . PHP_EOL;
+
+        echo 'TOTAL SAVED: ' . $cnt . PHP_EOL;
     }
 }

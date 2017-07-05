@@ -52,8 +52,8 @@ class Utils
         $pages = (int)ceil($adsCount / Parser::ADS_PER_PAGE);
         echo 'FIND: ' . $pages . ' Pages' . PHP_EOL;
 
-        $result = [];
-        $requests = function ($total) use ($url, $result) {
+        
+        $requests = function ($total) use ($url) {
             for ($i = 1; $i <= $total; $i++) {
                 $currentUrl = $url . Parser::CATEGORY;
                 yield new Request('GET', ($i > 1 ? $currentUrl . '?' . Parser::SEARCH_PARAMS . $i : $currentUrl));

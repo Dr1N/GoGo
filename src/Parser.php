@@ -6,8 +6,12 @@ use DiDom\Document;
 use DiDom\Element;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Pool;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 use League\CLImate\CLImate;
 use src\models\Ad;
+use src\models\City;
 use src\models\Country;
 
 class Parser
@@ -17,6 +21,8 @@ class Parser
     const ADS_PER_PAGE = 50;
     const ATTEMPT_DOWNLOAD = 2;
     const ATTEMPT_PAUSE = 1;
+
+    static public $result = [];
 
     /**
      * Get Cities from Country
@@ -63,43 +69,52 @@ class Parser
         return $cities;
     }
 
-    /**
-     * Get AD Urls for city
-     * @param $url string city url
-     * @param null $lastUrl string last ad url in base
-     * @return array
-     */
-    static public function getAdUrls($url, $lastUrl = null)
+    static public function getAdUrls(City $city)
     {
-        $result = [];
+        $url = $city->url;
         $adsCount = self::getAdsCount($url);
+        echo 'ADS: ' . $adsCount . PHP_EOL;
         $pages = (int)ceil($adsCount / self::ADS_PER_PAGE);
         echo 'FIND: ' . $pages . ' Pages' . PHP_EOL;
-        $progress = (new CLImate())->progress()->total($pages);
-        for ($page = 1; $page <= $pages; $page++) {
-            $currentUrl = $url . self::CATEGORY;
-            if ($page > 1) {
-                $currentUrl = $currentUrl . '?' . self::SEARCH_PARAMS . $page;
-            }
-            $document = self::getDocument($currentUrl);
-            list($urls, $isContinue) = self::getUrlsFromPage($document, $lastUrl);
-            $result = array_merge($result, $urls);
-            if (!$isContinue) {
-                $progress->current($pages);
-                break;
-            }
-            $progress->current($page);
-        }
-        echo 'FIND: ' . count($result) . ' Urls' . PHP_EOL;
 
-        return array_unique($result);
+        $progress = (new CLImate())->progress()->total($pages);
+
+        //Request
+        $requests = function ($total) use ($url, $progress) {
+            for ($i = 1; $i <= $total; $i++) {
+                $currentUrl = $url . Parser::CATEGORY;
+                $progress->advance();
+                yield new Request('GET', ($i > 1 ? $currentUrl . '?' . Parser::SEARCH_PARAMS . $i : $currentUrl));
+            }
+        };
+
+        //Pool
+        self::$result = [];
+        $client = new Client();
+        $pool = new Pool($client, $requests($pages), [
+            'concurrency' => GZ_CONCURRENT,
+            'fulfilled' => function (Response $response, $index) {
+                $document = new Document($response->getBody()->getContents());
+                $urls = Parser::getUrlsFromPage($document);
+                self::$result = array_merge(self::$result, $urls);
+            },
+            'rejected' => function ($reason, $index) {
+                echo $index . ' Fail!'  . $reason . PHP_EOL;
+            },
+        ]);
+        $promise = $pool->promise();
+        $promise->wait();
+        
+        self::$result = array_unique(self::$result);
+
+        return self::$result;
     }
 
-    static public function getUrlsFromPage(Document $document, $lastUrl)
+    static public function getUrlsFromPage(Document $document)
     {
         $result = [];
         if ($document == null) {
-            return [$result, true];
+            return $result;
         }
         try {
             $contentDiv = $document->find('div.main-content');
@@ -107,9 +122,6 @@ class Parser
                 $links = $contentDiv[0]->find('a.link_post');
                 foreach ($links as $link) {
                     $adUrl = $link->getAttribute('href');
-                    if (!empty($lastUrl) && $lastUrl == $adUrl) {
-                        return [$result, false];
-                    }
                     if ($link->has('b')) {
                         $result[] = $adUrl;
                     }
@@ -120,7 +132,7 @@ class Parser
             self::logParsing($ex->getMessage());
         }
 
-        return [$result, true];
+        return $result;
     }
 
     static public function getAdsCount($url)
@@ -138,11 +150,10 @@ class Parser
         return 0;
     }
 
-    static public function getAdDataByUrl($url)
+    static public function getAdDataFromDocument(Document $document, $url)
     {
         $result = [];
         try {
-            $document = self::getDocument($url);
             if ($document === null) return $result;
             //Url
             $result['url'] = $url;
