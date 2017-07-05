@@ -99,16 +99,20 @@ class Application
 
     static private function parseAdsFromCountry(Country $country)
     {
+        Application::log("### Begin Country ({$country->name}) ###", 'process');
         $cities = $country->getCities();
         foreach ($cities as $city) {
             self::parseAdsFromCity($city);
         }
+        Application::log("### End Country ({$country->name}) ###", 'process');
     }
 
     static private function parseAdsFromCity(City $city)
     {
+        Application::log("### Begin City ({$city->name}) ###", 'process');
+
         //Urls
-        $urls = self::parseAdUrls($city);
+        $urls = Parser::getAdUrls($city);
         self::saveAdUrls($urls, $city->id);
 
         //Ads
@@ -150,6 +154,8 @@ class Application
         }
 
         echo PHP_EOL . 'DONE' . PHP_EOL;
+
+        Application::log("### End City ({$city->name}) ###", 'process');
     }
 
     static private function save($parsedData, Ad $ad, City $city)
@@ -264,17 +270,11 @@ class Application
         }
     }
 
-    static private function parseAdUrls(City $city)
-    {
-        $urlList = Parser::getAdUrls($city);
-
-        return $urlList;
-    }
-
     static private function saveAdUrls($urls, $cityId)
     {
+        echo 'SAVE URLS' . PHP_EOL;
+
         $climate = new CLImate();
-        $climate->clear();
         if (count($urls) == 0) {
             $climate->progress(100)->current(100);
             return;
@@ -283,7 +283,11 @@ class Application
         //TODO optimization
         //New Urls
         $allUrls = Model::rawQueryValue('SELECT `url` FROM `ads` WHERE `city_id`=' . $cityId);
-        $urlsForSave = array_diff($urls, $allUrls);
+        if (!empty($allUrls)) {
+            $urlsForSave = array_diff($urls, $allUrls);
+        } else {
+            $urlsForSave = $urls;
+        }
 
         //Save
         $progress = $climate->progress(count($urls));

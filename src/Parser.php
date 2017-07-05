@@ -78,7 +78,6 @@ class Parser
         echo 'FIND: ' . $pages . ' Pages' . PHP_EOL;
 
         $progress = (new CLImate())->progress()->total($pages);
-
         //Request
         $requests = function ($total) use ($url, $progress) {
             for ($i = 1; $i <= $total; $i++) {
