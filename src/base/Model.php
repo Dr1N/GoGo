@@ -71,6 +71,11 @@ class Model
         return Application::$db->delete(static::$tableName);
     }
 
+    static public function rawQueryValue($query)
+    {
+        return Application::$db->rawQueryValue($query);
+    }
+
     public function validate()
     {
         return true;

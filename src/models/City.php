@@ -58,4 +58,15 @@ class City extends Model
 
         return $result;
     }
+
+    public function getLastAd()
+    {
+        Application::$db->where('city_id', $this->id);
+        $maxDate = Application::$db->rawQueryValue('SELECT MAX(`date`) FROM `ads`');
+        Application::$db->where('city_id', $this->id);
+        Application::$db->where('date', $maxDate[0]);
+        $lastAd = Application::$db->getOne(Ad::$tableName);
+
+        return Ad::createObjectFromArray($lastAd);
+    }
 }

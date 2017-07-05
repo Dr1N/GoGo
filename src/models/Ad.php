@@ -42,18 +42,6 @@ class Ad extends Model
         return self::createObjectFromArray($ad);
     }
 
-    static public function findLastAdInCity(City $city)
-    {
-        Application::$db->where('city_id', $city->id);
-        $maxDate = Application::$db->rawQueryValue('SELECT MAX(`date`) FROM `ads`');
-
-        Application::$db->where('city_id', $city->id);
-        Application::$db->where('date', $maxDate[0]);
-        $lastAd = Application::$db->getOne(self::$tableName);
-
-        return self::createObjectFromArray($lastAd);
-    }
-    
     public function getImages($offset = null, $limit = null)
     {
         $result = [];
