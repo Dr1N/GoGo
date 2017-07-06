@@ -149,18 +149,27 @@ class Application
             $pool = new Pool($client, $requests(count($unparsedAds)), [
                 'concurrency' => GZ_CONCURRENT,
                 'fulfilled' => function (Response $response, $index) use ($unparsedAds, $city) {
-                    $document = new Document($response->getBody()->getContents());
-                    $parsedData = Parser::getAdDataFromDocument($document, $unparsedAds[$index]->url);
-                    if (!self::save($parsedData, $unparsedAds[$index], $city)) {
-                        Application::log('SAVE ERROR: ' . $unparsedAds[$index]->url);
+                    try {
+                        $document = new Document($response->getBody()->getContents());
+                        $parsedData = Parser::getAdDataFromDocument($document, $unparsedAds[$index]->url);
+                        if (!self::save($parsedData, $unparsedAds[$index], $city)) {
+                            Application::log('SAVE ERROR: ' . $unparsedAds[$index]->url, 'app');
+                        }
+                    } catch (\Exception $ex) {
+                        Application::log($ex->getMessage(), 'app');
                     }
                 },
                 'rejected' => function ($reason, $index) {
+                    Application::log($index . ' Fail!'  . $reason, 'app');
                     echo $index . ' Fail!'  . $reason . PHP_EOL;
                 },
             ]);
-            $promise = $pool->promise();
-            $promise->wait();
+            try {
+                $promise = $pool->promise();
+                $promise->wait();
+            } catch (\Exception $ex) {
+                Application::log($ex->getMessage(), 'app');
+            }
         }
 
         echo PHP_EOL . 'DONE' . PHP_EOL;
