@@ -77,6 +77,12 @@ class Parser
         $pages = (int)ceil($adsCount / self::ADS_PER_PAGE);
         echo 'FIND: ' . $pages . ' Pages' . PHP_EOL;
 
+        //Page Limit
+        if (DEPTH_PAGES != null) {
+            echo 'DEPTH: ' . DEPTH_PAGES . PHP_EOL;
+            $pages = DEPTH_PAGES;
+        }
+
         $progress = (new CLImate())->progress()->total($pages);
         //Request
         $requests = function ($total) use ($url, $progress) {
