@@ -78,8 +78,8 @@ class Parser
         echo 'FIND: ' . $pages . ' Pages' . PHP_EOL;
 
         //Page Limit
-        var_dump(Ad::findCountByCity($city)); die();
-        if (DEPTH_PAGES != null) {
+        $cityAdCnt = Ad::findCountByCity($city);
+        if ($cityAdCnt != 0 && DEPTH_PAGES != null) {
             echo 'DEPTH: ' . DEPTH_PAGES . PHP_EOL;
             $pages = DEPTH_PAGES;
         }
