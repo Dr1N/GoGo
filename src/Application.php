@@ -136,7 +136,7 @@ class Application
             if (empty($unparsedAds)) {
                 break;
             }
-            echo 'UNPARSED URLS: ' . count($unparsedAds) . PHP_EOL;
+            echo 'UNPARSED URLS: ' . count($unparsedAds) . PHP_EOL; die();
             $progress = (new CLImate())->progress()->total(count($unparsedAds));
             //Request
             $requests = function ($total) use ($unparsedAds, $progress) {
