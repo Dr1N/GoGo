@@ -173,7 +173,11 @@ class Application
             //Clean empty
             $tmp = Application::$db->rawQuery('DELETE FROM `ads` WHERE `parsed` IS NULL');
             echo 'CLEANED: ';
-            print_r($tmp);
+            if (!empty($tmp)){
+                print_r($tmp);
+            } else {
+                echo '0' . PHP_EOL;
+            }
         }
 
         echo PHP_EOL . 'DONE' . PHP_EOL;
@@ -299,7 +303,7 @@ class Application
         }
     }
 
-    static private function saveAdUrls($urls, $cityId)
+    static private function saveAdUrls($urls, City $city)
     {
         echo 'SAVE URLS' . PHP_EOL;
 
@@ -311,16 +315,16 @@ class Application
 
         //TODO optimization
         //New Urls
-        $allUrls = Model::rawQueryValue('SELECT `url` FROM `ads` WHERE `city_id`=' . $cityId);
+        $allUrls = Model::rawQueryValue('SELECT `url` FROM `ads` WHERE `city_id`=' . $city->id);
         if (!empty($allUrls)) {
             $urlsForSave = array_diff($urls, $allUrls);
         } else {
             $urlsForSave = $urls;
         }
 
-        if (count($urls) === count($urlsForSave)) {
-            Application::log('NEED DEPTH', 'parser');
-            echo 'NEED MORE DEPTH (!)' . PHP_EOL;
+        $cityAdCnt = Ad::findCountByCity($city);
+        if ($cityAdCnt != 0 && count($urls) === count($urlsForSave)) {
+            Application::log('NEED MORE DEPTH (!)', 'parser');
         }
 
         //Save
@@ -329,7 +333,7 @@ class Application
         foreach ($urlsForSave as $url) {
             $progress->advance();
             $ad = new Ad();
-            $ad->city_id = $cityId;
+            $ad->city_id = $city->id;
             $ad->url = $url;
             if ($ad->insert()) {
                 $cnt++;
