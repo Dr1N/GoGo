@@ -42,6 +42,13 @@ class Ad extends Model
         return self::createObjectFromArray($ad);
     }
 
+    static public function findCountByCity($city)
+    {
+        $cnt = Application::$db->rawQueryValue("SELECT COUNT(*) FROM " . self::$tableName . " WHERE `city_id`=" . $city->id);
+
+        return $cnt;
+    }
+
     public function getImages($offset = null, $limit = null)
     {
         $result = [];

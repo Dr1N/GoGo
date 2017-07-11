@@ -169,6 +169,11 @@ class Application
             } catch (\Exception $ex) {
                 Application::log($ex->getMessage(), 'app');
             }
+            
+            //Clean empty
+            $tmp = Application::$db->rawQuery('DELETE FROM `ads` WHERE `parsed` IS NULL');
+            echo 'CLEANED: ';
+            print_r($tmp);
         }
 
         echo PHP_EOL . 'DONE' . PHP_EOL;
@@ -285,7 +290,7 @@ class Application
                         }
                     }
                 } catch (\Exception $ex) {
-                    echo $ex->getMessage() . PHP_EOL;
+                    Application::log($ex->getMessage(), 'images');
                 }
             }
             if ($imageModel->insert() === false) {
@@ -313,8 +318,13 @@ class Application
             $urlsForSave = $urls;
         }
 
+        if (count($urls) === count($urlsForSave)) {
+            Application::log('NEED DEPTH', 'parser');
+            echo 'NEED MORE DEPTH (!)' . PHP_EOL;
+        }
+
         //Save
-        $progress = $climate->progress(count($urls));
+        $progress = $climate->progress(count($urlsForSave));
         $cnt = 0;
         foreach ($urlsForSave as $url) {
             $progress->advance();
