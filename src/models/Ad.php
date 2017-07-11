@@ -44,7 +44,7 @@ class Ad extends Model
 
     static public function findCountByCity($city)
     {
-        $cnt = Application::$db->rawQueryValue("SELECT COUNT(*) FROM " . self::$tableName . " WHERE `city_id`=" . $city->id);
+        $cnt = Application::$db->rawQueryOne("SELECT COUNT(*) FROM " . self::$tableName . " WHERE `city_id`=" . $city->id);
 
         return $cnt;
     }
