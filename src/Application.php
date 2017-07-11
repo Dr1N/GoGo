@@ -122,7 +122,7 @@ class Application
 
         //Urls
         $urls = Parser::getAdUrls($city);
-        self::saveAdUrls($urls, $city->id);
+        self::saveAdUrls($urls, $city);
 
         //Ads
         $offset = 0;
