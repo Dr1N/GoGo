@@ -169,17 +169,11 @@ class Application
             } catch (\Exception $ex) {
                 Application::log($ex->getMessage(), 'app');
             }
-            
-            //Clean empty
-            $tmp = Application::$db->rawQuery('DELETE FROM `ads` WHERE `parsed` IS NULL');
-            echo 'CLEANED: ';
-            if (!empty($tmp)){
-                print_r($tmp);
-            } else {
-                echo '0' . PHP_EOL;
-            }
         }
 
+        //Clean empty
+        Application::$db->rawQuery('DELETE FROM `ads` WHERE `parsed` IS NULL');
+        echo 'CLEANED' . PHP_EOL;
         echo PHP_EOL . 'DONE' . PHP_EOL;
 
         Application::log("### End City ({$city->name}) ###", 'process');
@@ -321,6 +315,8 @@ class Application
         } else {
             $urlsForSave = $urls;
         }
+
+        echo 'URL FOR SAVE: ' . count($urlsForSave) . PHP_EOL;
 
         $cityAdCnt = Ad::findCountByCity($city);
         if ($cityAdCnt != 0 && count($urls) === count($urlsForSave)) {
