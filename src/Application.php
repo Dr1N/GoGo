@@ -165,14 +165,14 @@ class Application
             ]);
             try {
                 $promise = $pool->promise();
-                $promise->wait();
+                $promise->wait(false); //TODO
             } catch (\Exception $ex) {
                 Application::log($ex->getMessage(), 'app');
             }
         }
 
         //Clean empty
-        Application::$db->rawQuery('DELETE FROM `ads` WHERE `parsed` IS NULL');
+        Application::$db->rawQuery('DELETE FROM `ads` WHERE `parsed` IS NULL AND `city_id`=' . $city->id);
         echo 'CLEANED' . PHP_EOL;
         echo PHP_EOL . 'DONE' . PHP_EOL;
 
