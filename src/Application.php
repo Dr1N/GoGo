@@ -121,9 +121,8 @@ class Application
         Application::log("### Begin City ({$city->name}) ###", 'process');
 
         //Urls
-        //TODO
-        //$urls = Parser::getAdUrls($city);
-        //self::saveAdUrls($urls, $city->id);
+        $urls = Parser::getAdUrls($city);
+        self::saveAdUrls($urls, $city->id);
 
         //Ads
         $offset = 0;
