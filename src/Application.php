@@ -179,12 +179,17 @@ class Application
 
     static private function save($parsedData, Ad $ad, City $city)
     {
+        if (empty($parsedData)) {
+            return false;
+        }
+
         //AD Model
         $adId = self::saveAdModel($ad, $parsedData);
         if ($adId === false) {
             echo 'AD SAVE ERROR!' . PHP_EOL;
             return false;
         }
+
         //Phone Models
         if (!empty($parsedData['phones'])) {
             self::saveAdPhones($parsedData['phones'], $ad->id);
