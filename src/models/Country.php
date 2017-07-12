@@ -38,6 +38,7 @@ class Country extends Model
             return [];
         }
         Application::$db->where('country_id', $this->id);
+        Application::$db->orderBy('id', 'ASC');
         $result = City::findAll($offset = null, $limit = null);
 
         return $result;
