@@ -136,7 +136,7 @@ class Application
             if (empty($unparsedAds)) {
                 break;
             }
-            echo 'UNPARSED URLS: ' . count($unparsedAds);
+            echo 'UNPARSED URLS: ' . count($unparsedAds); die();
             $progress = (new CLImate())->progress()->total(count($unparsedAds));
             //Request
             $requests = function ($total) use ($unparsedAds, $progress) {
