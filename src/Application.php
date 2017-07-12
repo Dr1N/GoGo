@@ -149,7 +149,7 @@ class Application
                 }
             };
             //Pool
-            $client = new Client(['http_errors' => false]); //TODO
+            $client = new Client(['http_errors' => false]);
             $pool = new Pool($client, $requests(count($unparsedAds)), [
                 'concurrency' => GZ_CONCURRENT,
                 'fulfilled' => function (Response $response, $index) use ($unparsedAds, $city) {

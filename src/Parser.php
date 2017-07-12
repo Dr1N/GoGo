@@ -96,13 +96,15 @@ class Parser
 
         //Pool
         self::$result = [];
-        $client = new Client();
+        $client = new Client(['http_errors' => false]);
         $pool = new Pool($client, $requests($pages), [
             'concurrency' => GZ_CONCURRENT,
             'fulfilled' => function (Response $response, $index) {
-                $document = new Document($response->getBody()->getContents());
-                $urls = Parser::getUrlsFromPage($document);
-                self::$result = array_merge(self::$result, $urls);
+                if ($response->getStatusCode() == 200) {
+                    $document = new Document($response->getBody()->getContents());
+                    $urls = Parser::getUrlsFromPage($document);
+                    self::$result = array_merge(self::$result, $urls);
+                }
             },
             'rejected' => function ($reason, $index) {
                 echo $index . ' Fail!'  . $reason . PHP_EOL;
@@ -262,39 +264,5 @@ class Parser
     static private function logParsing($error)
     {
         Application::log($error, 'parser');
-    }
-
-    /**
-     * @param $url
-     * @return Document|null
-     */
-    private static function getDocument($url)
-    {
-        $document = null;
-        //DiDom
-        for ($i = 0; $i < self::ATTEMPT_DOWNLOAD; $i++) {
-            try {
-                $document = new Document($url, true);
-                return $document;
-            } catch (\Exception $ex) {
-                sleep(self::ATTEMPT_PAUSE);
-            }
-        }
-        //Guzzle
-        try {
-            $client = new Client();
-            $response = $client->request('GET', $url);
-            $body = $response->getBody()->getContents();
-            $document = new Document($body);
-        } catch (ClientException $cex) {
-            self::logParsing($cex->getMessage());
-            self::logParsing($cex->getCode());
-            self::logParsing($cex->getRequest()->getUri());
-            self::logParsing($cex->getResponse()->getHeaders());
-        } catch (\Exception $ex) {
-            self::logParsing($ex->getMessage());
-        }
-
-        return $document;
     }
 }
