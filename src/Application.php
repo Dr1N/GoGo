@@ -151,12 +151,12 @@ class Application
                 'concurrency' => GZ_CONCURRENT,
                 'fulfilled' => function (Response $response, $index) use ($unparsedAds, $city) {
                     try {
-                        echo $response->getStatusCode() . PHP_EOL;
-                        $document = new Document($response->getBody()->getContents());
-                        print_r($document); die(); //TODO
-                        $parsedData = Parser::getAdDataFromDocument($document, $unparsedAds[$index]->url);
-                        if (!self::save($parsedData, $unparsedAds[$index], $city)) {
-                            Application::log('SAVE ERROR: ' . $unparsedAds[$index]->url, 'app');
+                        if ($response->getStatusCode() == 200) {
+                            $document = new Document($response->getBody()->getContents());
+                            $parsedData = Parser::getAdDataFromDocument($document, $unparsedAds[$index]->url);
+                            if (!self::save($parsedData, $unparsedAds[$index], $city)) {
+                                Application::log('SAVE ERROR: ' . $unparsedAds[$index]->url, 'app');
+                            }
                         }
                     } catch (\Exception $ex) {
                         Application::log($ex->getMessage(), 'app');
