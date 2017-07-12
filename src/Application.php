@@ -166,8 +166,7 @@ class Application
                     }
                 },
                 'rejected' => function ($reason, $index) {
-                    Application::log($index . ' Fail!'  . $reason, 'app');
-                    echo $index . ' Fail!'  . $reason . PHP_EOL;
+                    Application::log('Rejected: ' . $index . ' ' . $reason, 'app');
                 },
             ]);
             try {
