@@ -121,7 +121,8 @@ class Application
         Application::log("### Begin City ({$city->name}) ###", 'process');
 
         //Urls
-        if (PARSE_URL) {
+        $unparsedAdsCnt = Ad::findUnparsedCountByCity($city);
+        if ($unparsedAdsCnt == 0 && PARSE_URL) {
             $urls = Parser::getAdUrls($city);
             self::saveAdUrls($urls, $city);
         }

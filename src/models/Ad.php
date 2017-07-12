@@ -42,9 +42,16 @@ class Ad extends Model
         return self::createObjectFromArray($ad);
     }
 
-    static public function findCountByCity($city)
+    static public function findCountByCity(City $city)
     {
         $cnt = Application::$db->rawQueryValue("SELECT COUNT(*) FROM " . self::$tableName . " WHERE `city_id`=" . $city->id);
+
+        return $cnt[0];
+    }
+
+    static public function findUnparsedCountByCity(City $city)
+    {
+        $cnt = Application::$db->rawQueryValue("SELECT COUNT(*) FROM " . self::$tableName . " WHERE `city_id`=" . $city->id . " AND `parsed IS NULL`");
 
         return $cnt[0];
     }
