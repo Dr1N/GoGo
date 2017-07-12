@@ -51,7 +51,7 @@ class Ad extends Model
 
     static public function findUnparsedCountByCity(City $city)
     {
-        $cnt = Application::$db->rawQueryValue("SELECT COUNT(*) FROM " . self::$tableName . " WHERE `city_id`=" . $city->id . " AND `parsed IS NULL`");
+        $cnt = Application::$db->rawQueryValue("SELECT COUNT(*) FROM " . self::$tableName . " WHERE `city_id`=" . $city->id . " AND `parsed` IS NULL");
 
         return $cnt[0];
     }
