@@ -12,4 +12,6 @@ $app = new Application();
 echo 'Hello!' . PHP_EOL;
 $ua = \src\models\Country::findByName('Украина');
 $cities = $ua->getCities();
-print_r($cities);
+foreach ($cities as $city) {
+    echo $city->id . PHP_EOL;
+}
