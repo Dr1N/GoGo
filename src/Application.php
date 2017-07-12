@@ -137,7 +137,7 @@ class Application
         $limit = DB_READ_PACKET;
 
         while (true) {
-            $query = "SELECT * FROM " . Ad::$tableName . " WHERE `parsed` IS NULL LIMIT $offset, $limit";
+            $query = "SELECT * FROM " . Ad::$tableName . " WHERE `city_id`={$city->id} AND `parsed` IS NULL LIMIT $offset, $limit";
             /* @var $unparsedAds Ad[] */
             $unparsedAds = Ad::rawQuery($query);
             if (empty($unparsedAds)) {
