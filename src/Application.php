@@ -122,6 +122,7 @@ class Application
 
         //Urls
         $unparsedAdsCnt = Ad::findUnparsedCountByCity($city);
+        echo 'ALL UNPARSED: ' . $unparsedAdsCnt . PHP_EOL;
         if ($unparsedAdsCnt == 0 && PARSE_URL) {
             $urls = Parser::getAdUrls($city);
             self::saveAdUrls($urls, $city);
@@ -138,7 +139,7 @@ class Application
             if (empty($unparsedAds)) {
                 break;
             }
-            echo 'UNPARSED URLS: ' . count($unparsedAds) . PHP_EOL;
+            echo 'UNPARSED PART URLS: ' . count($unparsedAds) . PHP_EOL;
             $progress = (new CLImate())->progress()->total(count($unparsedAds));
             //Request
             $requests = function ($total) use ($unparsedAds, $progress) {
@@ -161,6 +162,7 @@ class Application
                             }
                         } else {
                             $unparsedAds[$index]->delete();
+                            Application::log('DELETE: ' . $unparsedAds[$index]->url, 'app');
                         }
                     } catch (\Exception $ex) {
                         Application::log($ex->getMessage(), 'app');
