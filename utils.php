@@ -10,4 +10,6 @@ use src\Application;
 $app = new Application();
 
 echo 'Hello!' . PHP_EOL;
-echo php_uname();
+$ua = \src\models\Country::findByName('Украина');
+$cities = $ua->getCities();
+print_r($cities);

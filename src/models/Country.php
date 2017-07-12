@@ -35,14 +35,10 @@ class Country extends Model
     public function getCities($offset = null, $limit = null)
     {
         if (empty($this->id)) {
-            return null;
+            return [];
         }
-        $result = [];
         Application::$db->where('country_id', $this->id);
-        $queryResult = City::findAll($offset = null, $limit = null);
-        foreach ($queryResult as $item) {
-            $result[] = City::createObjectFromArray($item);
-        }
+        $result = City::findAll($offset = null, $limit = null);
 
         return $result;
     }
