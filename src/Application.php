@@ -151,6 +151,7 @@ class Application
                 'concurrency' => GZ_CONCURRENT,
                 'fulfilled' => function (Response $response, $index) use ($unparsedAds, $city) {
                     try {
+                        echo $response->getStatusCode() . PHP_EOL;
                         $document = new Document($response->getBody()->getContents());
                         print_r($document); die(); //TODO
                         $parsedData = Parser::getAdDataFromDocument($document, $unparsedAds[$index]->url);
