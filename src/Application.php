@@ -132,6 +132,7 @@ class Application
 
         while (true) {
             $query = "SELECT * FROM " . Ad::$tableName . " WHERE `parsed` IS NULL LIMIT $offset, $limit";
+            /* @var $unparsedAds Ad[] */
             $unparsedAds = Ad::rawQuery($query);
             if (empty($unparsedAds)) {
                 break;
@@ -157,6 +158,8 @@ class Application
                             if (!self::save($parsedData, $unparsedAds[$index], $city)) {
                                 Application::log('SAVE ERROR: ' . $unparsedAds[$index]->url, 'app');
                             }
+                        } else {
+                            $unparsedAds[$index]->delete();
                         }
                     } catch (\Exception $ex) {
                         Application::log($ex->getMessage(), 'app');
