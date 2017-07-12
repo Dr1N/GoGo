@@ -136,7 +136,7 @@ class Application
             if (empty($unparsedAds)) {
                 break;
             }
-            echo 'UNPARSED URLS: ' . count($unparsedAds) . PHP_EOL; die();
+            echo 'UNPARSED URLS: ' . count($unparsedAds);
             $progress = (new CLImate())->progress()->total(count($unparsedAds));
             //Request
             $requests = function ($total) use ($unparsedAds, $progress) {
@@ -146,7 +146,7 @@ class Application
                 }
             };
             //Pool
-            $client = new Client();
+            $client = new Client(['http_errors' => false]);
             $pool = new Pool($client, $requests(count($unparsedAds)), [
                 'concurrency' => GZ_CONCURRENT,
                 'fulfilled' => function (Response $response, $index) use ($unparsedAds, $city) {
@@ -167,7 +167,7 @@ class Application
             ]);
             try {
                 $promise = $pool->promise();
-                $promise->wait(false); //TODO
+                $promise->wait();
             } catch (\Exception $ex) {
                 Application::log($ex->getMessage(), 'app');
             }
