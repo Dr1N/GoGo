@@ -263,6 +263,6 @@ class Parser
     
     static private function logParsing($error)
     {
-        Application::log($error, 'parser');
+        Application::log($error, 'parser', true);
     }
 }

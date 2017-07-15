@@ -40,9 +40,12 @@ class Application
         }
     }
 
-    static public function log($message, $category = 'app')
+    static public function log($message, $category = 'app', $console = false)
     {
-        echo $message . PHP_EOL;
+        if ($console) {
+            echo $message . PHP_EOL;
+        }
+        
         @file_put_contents("logs/$category.log", date('d.m.Y H:i:s') . "\t" . $message . PHP_EOL, FILE_APPEND);
     }
 
@@ -108,21 +111,21 @@ class Application
 
     static private function parseAdsFromCountry(Country $country)
     {
-        Application::log("### Begin Country ({$country->name}) ###", 'process');
+        Application::log("### Begin Country ({$country->name}) ###", 'process', true);
         $cities = $country->getCities();
         foreach ($cities as $city) {
             if (BEGIN_CITY_ID !== null && $city->id < BEGIN_CITY_ID) {
-                Application::log("{$city->id} {$city->name} continue");
+                Application::log("{$city->id} {$city->name} continue", true);
                 continue;
             }
             self::parseAdsFromCity($city);
         }
-        Application::log("### End Country ({$country->name}) ###", 'process');
+        Application::log("### End Country ({$country->name}) ###", 'process', true);
     }
 
     static private function parseAdsFromCity(City $city)
     {
-        Application::log("### Begin City ({$city->name}) ###", 'process');
+        Application::log("### Begin City ({$city->name}) ###", 'process', true);
 
         //Urls
         $unparsedAdsCnt = Ad::findUnparsedCountByCity($city);
@@ -189,7 +192,7 @@ class Application
         echo 'CLEANED' . PHP_EOL;
         echo PHP_EOL . 'DONE' . PHP_EOL;
 
-        Application::log("### End City ({$city->name}) ###", 'process');
+        Application::log("### End City ({$city->name}) ###", 'process', true);
     }
 
     static private function save($parsedData, Ad $ad, City $city)
@@ -333,7 +336,7 @@ class Application
 
         $cityAdCnt = Ad::findCountByCity($city);
         if ($cityAdCnt != 0 && count($urls) === count($urlsForSave)) {
-            Application::log('NEED MORE DEPTH (!)', 'parser');
+            Application::log('NEED MORE DEPTH (!)', 'parser', true);
         }
 
         //Save
