@@ -73,14 +73,14 @@ class Parser
     {
         $url = $city->url;
         $adsCount = self::getAdsCount($url);
-        echo 'ADS: ' . $adsCount . PHP_EOL;
+        Application::log('ADS: ' . $adsCount, 'app', true);
         $pages = (int)ceil($adsCount / self::ADS_PER_PAGE);
-        echo 'FIND: ' . $pages . ' Pages' . PHP_EOL;
+        Application::log('FIND: ' . $pages . ' Pages', 'app', true);
 
         //Page Limit
         $cityAdCnt = Ad::findCountByCity($city);
         if ($cityAdCnt != 0 && DEPTH_PAGES != null) {
-            echo 'DEPTH: ' . DEPTH_PAGES . PHP_EOL;
+            Application::log('DEPTH: ' . DEPTH_PAGES, 'app', true);
             $pages = DEPTH_PAGES;
         }
 
@@ -107,7 +107,7 @@ class Parser
                 }
             },
             'rejected' => function ($reason, $index) {
-                echo $index . ' Fail!'  . $reason . PHP_EOL;
+                Application::log($index . ' Fail!'  . $reason, 'app', true);
             },
         ]);
         $promise = $pool->promise();
@@ -263,6 +263,6 @@ class Parser
     
     static private function logParsing($error)
     {
-        Application::log($error, 'parser', true);
+        Application::log($error, 'app', true);
     }
 }

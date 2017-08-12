@@ -36,7 +36,7 @@ class Application
                 'charset' => 'utf8'
             ]);
         } catch (\Exception $ex) {
-            echo 'ERROR: ' . $ex->getMessage() . PHP_EOL;
+            Application::log('ERROR: ' . $ex->getMessage(), 'app', true);
         }
     }
 
@@ -88,12 +88,12 @@ class Application
 
     public function parseCities()
     {
-        echo '### Cities Parsing ###' . PHP_EOL;
+        Application::log('### Cities Parsing ###', 'app', true);
         City::truncate();
         $countries = Country::findAll();
         foreach ($countries as $country) {
             /* @var $country Country*/
-            echo "\t{$country->name}:" . PHP_EOL;
+            Application::log("\t{$country->name}:", 'app', true);
             $cities = Parser::getCities($country);
             if (!empty($cities)) {
                 foreach ($cities as $name => $url) {
@@ -102,11 +102,11 @@ class Application
                     $city->name = $name;
                     $city->url = $url;
                     $city->insert();
-                    echo "\t\t{$city->name}" . PHP_EOL;
+                    Application::log("\t\t{$city->name}", 'app', true);
                 }
             }
         }
-        echo 'Parsing Done!' . PHP_EOL;
+        Application::log('### Parsing Done! ###', 'app', true);
     }
 
     static private function parseAdsFromCountry(Country $country)
@@ -129,7 +129,7 @@ class Application
 
         //Urls
         $unparsedAdsCnt = Ad::findUnparsedCountByCity($city);
-        echo 'ALL UNPARSED: ' . $unparsedAdsCnt . PHP_EOL;
+        Application::log('ALL UNPARSED: ' . $unparsedAdsCnt, 'app', true);
         if ($unparsedAdsCnt == 0 && PARSE_URL) {
             $urls = Parser::getAdUrls($city);
             self::saveAdUrls($urls, $city);
@@ -146,7 +146,7 @@ class Application
             if (empty($unparsedAds)) {
                 break;
             }
-            echo 'UNPARSED PART URLS: ' . count($unparsedAds) . PHP_EOL;
+            Application::log('UNPARSED PART URLS: ' . count($unparsedAds), 'app', true);
             $progress = (new CLImate())->progress()->total(count($unparsedAds));
             //Request
             $requests = function ($total) use ($unparsedAds, $progress) {
@@ -189,9 +189,8 @@ class Application
 
         //Clean empty
         Application::$db->rawQuery('DELETE FROM `ads` WHERE `parsed` IS NULL AND `city_id`=' . $city->id);
-        echo 'CLEANED' . PHP_EOL;
-        echo PHP_EOL . 'DONE' . PHP_EOL;
-
+        Application::log('CLEANED', 'app', true);
+        Application::log('DONE', 'app', true);
         Application::log("### End City ({$city->name}) ###", 'process', true);
     }
 
@@ -204,7 +203,7 @@ class Application
         //AD Model
         $adId = self::saveAdModel($ad, $parsedData);
         if ($adId === false) {
-            echo 'AD SAVE ERROR!' . PHP_EOL;
+            Application::log('AD SAVE ERROR!', 'app', true);
             return false;
         }
 
@@ -253,10 +252,10 @@ class Application
                     $adPhoneRelation->ad_id = $adId;
                     $adPhoneRelation->phone_id = $phoneId;
                     if ($adPhoneRelation->insert() === false) {
-                        echo 'AD PHONE RELATION SAVE ERROR!' . PHP_EOL;
+                        Application::log('AD PHONE RELATION SAVE ERROR!', 'app', true);
                     }
                 } else {
-                    echo 'PHONE SAVE ERROR!' . PHP_EOL;
+                    Application::log('PHONE SAVE ERROR!', 'app', true);
                 }
             } else {
                 //Add Relation
@@ -264,7 +263,7 @@ class Application
                 $adPhoneRelation->ad_id = $adId;
                 $adPhoneRelation->phone_id = $existsPhone->id;
                 if ($adPhoneRelation->insert() === false) {
-                    echo 'AD PHONE RELATION SAVE ERROR!' . PHP_EOL;
+                    Application::log('AD PHONE RELATION SAVE ERROR!', 'app', true);
                 }
             }
         }
@@ -280,7 +279,7 @@ class Application
         $dirName = 'c' . $city->id;
         if (!is_dir('images' . DIRECTORY_SEPARATOR . $dirName)) {
             if (!mkdir('images' . DIRECTORY_SEPARATOR . $dirName)) {
-                echo "Can't create directory [$dirName]" . PHP_EOL;
+                Application::log("Can't create directory [$dirName]", 'app', true);
                 return;
             }
         }
@@ -304,18 +303,18 @@ class Application
                         }
                     }
                 } catch (\Exception $ex) {
-                    Application::log($ex->getMessage(), 'images');
+                    Application::log($ex->getMessage(), 'app');
                 }
             }
             if ($imageModel->insert() === false) {
-                echo 'IMAGE SAVE ERROR!' . PHP_EOL;
+                Application::log('IMAGE SAVE ERROR!', 'app');
             }
         }
     }
 
     static private function saveAdUrls($urls, City $city)
     {
-        echo 'SAVE URLS' . PHP_EOL;
+        Application::log('SAVE URLS', 'app', true);
 
         $climate = new CLImate();
         if (count($urls) == 0) {
@@ -332,11 +331,11 @@ class Application
             $urlsForSave = $urls;
         }
 
-        echo 'URL FOR SAVE: ' . count($urlsForSave) . PHP_EOL;
+        Application::log('URL FOR SAVE: ' . count($urlsForSave), 'app', true);
 
         $cityAdCnt = Ad::findCountByCity($city);
         if ($cityAdCnt != 0 && count($urls) === count($urlsForSave)) {
-            Application::log('NEED MORE DEPTH (!)', 'parser', true);
+            Application::log('NEED MORE DEPTH (!)', 'app', true);
         }
 
         //Save
@@ -352,6 +351,6 @@ class Application
             }
         }
 
-        echo 'TOTAL SAVED: ' . $cnt . PHP_EOL;
+        Application::log('TOTAL SAVED: ' . $cnt, 'app', true);
     }
 }

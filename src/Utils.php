@@ -38,9 +38,4 @@ class Utils
         }
         echo PHP_EOL . 'Done. Deleted: ' . $cnt . PHP_EOL;
     }
-
-    static public function run()
-    {
-        echo 'Run from Utils' . PHP_EOL;
-    }
 }

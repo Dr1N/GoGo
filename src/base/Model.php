@@ -37,7 +37,7 @@ class Model
         try {
             return $ids = Application::$db->insertMulti(static::$tableName, $data, $keys);
         } catch (\Exception $ex) {
-            echo $ex->getMessage() . PHP_EOL;
+            Application::log($ex->getMessage(), 'app', true);
             return false;
         }
     }
