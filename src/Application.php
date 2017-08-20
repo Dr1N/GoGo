@@ -175,7 +175,9 @@ class Application
                         Application::log($ex->getMessage(), 'app');
                     }
                 },
-                'rejected' => function ($reason, $index) {
+                'rejected' => function ($reason, $index) use ($unparsedAds) {
+                    $unparsedAds[$index]->delete();
+                    Application::log('DELETE: ' . $unparsedAds[$index]->url, 'app');
                     Application::log('Rejected: ' . $index . ' ' . $reason, 'app');
                 },
             ]);
