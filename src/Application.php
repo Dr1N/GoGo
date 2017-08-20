@@ -115,7 +115,7 @@ class Application
         $cities = $country->getCities();
         foreach ($cities as $city) {
             if (BEGIN_CITY_ID !== null && $city->id < BEGIN_CITY_ID) {
-                Application::log("{$city->id} {$city->name} continue", true);
+                Application::log("{$city->id} {$city->name} continue", 'app', true);
                 continue;
             }
             self::parseAdsFromCity($city);
