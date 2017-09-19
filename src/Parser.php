@@ -78,8 +78,7 @@ class Parser
         Application::log('FIND: ' . $pages . ' Pages', 'app', true);
 
         //Page Limit
-        $cityAdCnt = Ad::findCountAdByCity($city);
-        if ($cityAdCnt != 0 && $city->pages != null) {
+        if ($city->pages != null) {
             Application::log('DEPTH: ' . $city->pages, 'app', true);
             $pages = $city->pages;
         }
