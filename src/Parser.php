@@ -78,10 +78,10 @@ class Parser
         Application::log('FIND: ' . $pages . ' Pages', 'app', true);
 
         //Page Limit
-        $cityAdCnt = Ad::findCountByCity($city);
-        if ($cityAdCnt != 0 && DEPTH_PAGES != null) {
-            Application::log('DEPTH: ' . DEPTH_PAGES, 'app', true);
-            $pages = DEPTH_PAGES;
+        $cityAdCnt = Ad::findCountAdByCity($city);
+        if ($cityAdCnt != 0 && $city->pages != null) {
+            Application::log('DEPTH: ' . $city->pages, 'app', true);
+            $pages = $city->pages;
         }
 
         $progress = (new CLImate())->progress()->total($pages);

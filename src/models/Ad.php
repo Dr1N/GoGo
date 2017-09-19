@@ -42,7 +42,7 @@ class Ad extends Model
         return self::createObjectFromArray($ad);
     }
 
-    static public function findCountByCity(City $city)
+    static public function findCountAdByCity(City $city)
     {
         $cnt = Application::$db->rawQueryValue("SELECT COUNT(*) FROM " . self::$tableName . " WHERE `city_id`=" . $city->id);
 

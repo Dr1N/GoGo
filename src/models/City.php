@@ -29,6 +29,27 @@ class City extends Model
      */
     public $url;
 
+    /**
+     * @var bool
+     */
+    public $is_enabled;
+
+    /**
+     * Depth scan
+     * @var integer
+     */
+    public $pages;
+
+    /**
+     * @var bool
+     */
+    public $save_image;
+
+    /**
+     * @var bool
+     */
+    public $parse_urls;
+
     static public function findByName($name)
     {
         Application::$db->where('name', $name);

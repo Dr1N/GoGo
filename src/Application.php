@@ -114,7 +114,7 @@ class Application
         Application::log("### Begin Country ({$country->name}) ###", 'process', true);
         $cities = $country->getCities();
         foreach ($cities as $city) {
-            if (BEGIN_CITY_ID !== null && $city->id < BEGIN_CITY_ID) {
+            if ($country->start_city_id !== null && $city->id < $country->start_city_id) {
                 Application::log("{$city->id} {$city->name} continue", 'app', true);
                 continue;
             }
@@ -130,7 +130,7 @@ class Application
         //Urls
         $unparsedAdsCnt = Ad::findUnparsedCountByCity($city);
         Application::log('ALL UNPARSED: ' . $unparsedAdsCnt, 'app', true);
-        if ($unparsedAdsCnt == 0 && PARSE_URL) {
+        if ($unparsedAdsCnt == 0 && $city->parse_urls == 1) {
             $urls = Parser::getAdUrls($city);
             self::saveAdUrls($urls, $city);
         }
@@ -279,7 +279,7 @@ class Application
     static private function saveAdImages($images, $adId, $city)
     {
         $dirName = 'c' . $city->id;
-        if (!is_dir('images' . DIRECTORY_SEPARATOR . $dirName)) {
+        if ($city->save_image && !is_dir('images' . DIRECTORY_SEPARATOR . $dirName)) {
             if (!mkdir('images' . DIRECTORY_SEPARATOR . $dirName)) {
                 Application::log("Can't create directory [$dirName]", 'app', true);
                 return;
@@ -292,7 +292,7 @@ class Application
             $imageModel->url = $city->url . substr($image, 2);
             $imageModel->filename = null;
             //File
-            if (SAVE_IMAGE) {
+            if ($city->save_image) {
                 try {
                     $tmp = explode('/', $image);
                     $fileName = array_pop($tmp);
@@ -335,7 +335,7 @@ class Application
 
         Application::log('URL FOR SAVE: ' . count($urlsForSave), 'app', true);
 
-        $cityAdCnt = Ad::findCountByCity($city);
+        $cityAdCnt = Ad::findCountAdByCity($city);
         if ($cityAdCnt != 0 && count($urls) === count($urlsForSave)) {
             Application::log('NEED MORE DEPTH (!)', 'app', true);
         }

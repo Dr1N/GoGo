@@ -11,74 +11,9 @@ class Model
      */
     static public  $tableName;
 
-    public function insert()
-    {
-        if (!$this->validate()) {
-            return false;
-        }
-        $data = [];
-        foreach ($this as $key => $value) {
-            $data[$key] = $value;
-        }
-        if (!empty($data)) {
-            try {
-                Application::$db->ping();
-            } catch (\Exception $ex) {
-                Application::$db->connect();
-            }
-            return Application::$db->insert(static::$tableName, $data);
-        }
-
-        return false;
-    }
-
-    static public function multiInsert($data, $keys)
-    {
-        try {
-            return $ids = Application::$db->insertMulti(static::$tableName, $data, $keys);
-        } catch (\Exception $ex) {
-            Application::log($ex->getMessage(), 'app', true);
-            return false;
-        }
-    }
-
-    public function save()
-    {
-        if (!$this->validate()) {
-            return false;
-        }
-        $data = [];
-        foreach ($this as $key => $value) {
-            $data[$key] = $value;
-        }
-        if (!empty($data)) {
-            try {
-                Application::$db->ping();
-            } catch (\Exception $ex) {
-                Application::$db->connect();
-            }
-            Application::$db->where('id', $this->id);
-            return Application::$db->update(static::$tableName, $data);
-        }
-
-        return false;
-    }
-
-    public function delete()
-    {
-        Application::$db->where('id', $this->id);
-
-        return Application::$db->delete(static::$tableName);
-    }
-
     static public function rawQueryValue($query)
     {
         return Application::$db->rawQueryValue($query);
-    }
-
-    public function validate()
-    {
-        return true;
     }
 
     static public function findAll($offset = null, $limit = null)
@@ -141,5 +76,70 @@ class Model
     static public function truncate()
     {
         return Application::$db->rawQuery('TRUNCATE TABLE ' . static::$tableName);
+    }
+
+    static public function multiInsert($data, $keys)
+    {
+        try {
+            return $ids = Application::$db->insertMulti(static::$tableName, $data, $keys);
+        } catch (\Exception $ex) {
+            Application::log($ex->getMessage(), 'app', true);
+            return false;
+        }
+    }
+
+    public function insert()
+    {
+        if (!$this->validate()) {
+            return false;
+        }
+        $data = [];
+        foreach ($this as $key => $value) {
+            $data[$key] = $value;
+        }
+        if (!empty($data)) {
+            try {
+                Application::$db->ping();
+            } catch (\Exception $ex) {
+                Application::$db->connect();
+            }
+            return Application::$db->insert(static::$tableName, $data);
+        }
+
+        return false;
+    }
+
+    public function save()
+    {
+        if (!$this->validate()) {
+            return false;
+        }
+        $data = [];
+        foreach ($this as $key => $value) {
+            $data[$key] = $value;
+        }
+        if (!empty($data)) {
+            try {
+                Application::$db->ping();
+            } catch (\Exception $ex) {
+                Application::$db->connect();
+            }
+            Application::$db->where('id', $this->id);
+            return Application::$db->update(static::$tableName, $data);
+        }
+
+        return false;
+    }
+
+    public function delete()
+    {
+        Application::$db->where('id', $this->id);
+
+        return Application::$db->delete(static::$tableName);
+    }
+
+    public function validate()
+    {
+        return true;
     }
 }

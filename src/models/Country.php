@@ -24,6 +24,16 @@ class Country extends Model
      */
     public $url;
 
+    /**
+     * @var bool
+     */
+    public $is_enabled;
+
+    /**
+     * @var integer | null
+     */
+    public $start_city_id;
+
     static public function findByName($name)
     {
         Application::$db->where('name', $name);
@@ -39,7 +49,7 @@ class Country extends Model
         }
         Application::$db->where('country_id', $this->id);
         Application::$db->orderBy('id', 'ASC');
-        $result = City::findAll($offset = null, $limit = null);
+        $result = City::findAll($offset, $limit);
 
         return $result;
     }
