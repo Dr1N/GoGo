@@ -51,30 +51,28 @@ class Application
 
     public function run($country = null, $city = null)
     {
-        $os = php_uname();
+        if ($country == null && $city == null) {
+            self::parseAllCountries();
+            return;
+        }
+
         if (!empty($country)) {
-            if (stripos($os, 'windows') !== false) {
-                $countryModel = Country::findByName(iconv('CP1251', 'UTF-8', $country));
-            } else {
-                $countryModel = Country::findByName($country);
-            }
+            $countryModel = Country::findByName($country);
             if ($countryModel != null) {
                 self::parseAdsFromCountry($countryModel);
             } else {
                 echo 'INCORRECT COUNTRY: ' . $country . PHP_EOL;
             }
+            return;
         }
         if (!empty($city)) {
-            if (stripos($os, 'windows') !== false) {
-                $cityModel = City::findByName(iconv('CP1251', 'UTF-8', $city));
-            } else {
-                $cityModel = City::findByName($city);
-            }
+            $cityModel = City::findByName($city);
             if ($cityModel != null) {
                 self::parseAdsFromCity($cityModel);
             } else {
                 echo 'INCORRECT CITY: ' . $city . PHP_EOL;
             }
+            return;
         }
     }
 
@@ -109,23 +107,41 @@ class Application
         Application::log('### Parsing Done! ###', 'app', true);
     }
 
+    static private function parseAllCountries()
+    {
+        $countries = Country::findAll();
+        foreach ($countries as $country) {
+            self::parseAdsFromCountry($country);
+        }
+    }
+
     static private function parseAdsFromCountry(Country $country)
     {
-        Application::log("### Begin Country ({$country->name}) ###", 'process', true);
+        Application::log("###### Begin Country ({$country->name}) ######", 'process', true);
+        if ($country->is_enabled == 0) {
+            Application::log("{$country->id} {$country->name} disabled", 'app', true);
+            return;
+        }
         $cities = $country->getCities();
         foreach ($cities as $city) {
+            /* @var $city City */
             if ($country->start_city_id !== null && $city->id < $country->start_city_id) {
-                Application::log("{$city->id} {$city->name} continue", 'app', true);
+                Application::log("{$city->id} {$city->name} missed", 'app', true);
                 continue;
             }
             self::parseAdsFromCity($city);
         }
-        Application::log("### End Country ({$country->name}) ###", 'process', true);
+        Application::log("###### End Country ({$country->name}) ######", 'process', true);
     }
 
     static private function parseAdsFromCity(City $city)
     {
         Application::log("### Begin City ({$city->name}) ###", 'process', true);
+
+        if ($city->is_enabled == 0) {
+            Application::log("{$city->id} {$city->name} disabled", 'app', true);
+            return;
+        }
 
         //Urls
         $unparsedAdsCnt = Ad::findUnparsedCountByCity($city);
