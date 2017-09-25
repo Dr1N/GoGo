@@ -22,6 +22,8 @@ if ($argc == 2) {
         $app->run($country, null);
     }
     exit(0);
+} else {
+    file_put_contents('test.txt', 'Hello from Cron');
 }
 
 echo '### Command Line ###' . PHP_EOL;
