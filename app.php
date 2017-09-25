@@ -9,9 +9,9 @@ use src\Application;
 
 $app = new Application();
 
-file_put_contents('test.txt', 'Hello from Cron', FILE_APPEND);
+file_put_contents('test.txt', 'Hello from Cron' . PHP_EOL, FILE_APPEND);
 for ($i = 0; $i < $argc; $i++) {
-    file_put_contents('test.txt', $argv[$i], FILE_APPEND);
+    file_put_contents('test.txt', $argv[$i] . PHP_EOL, FILE_APPEND);
 }
 exit();
 
