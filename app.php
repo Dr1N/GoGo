@@ -8,6 +8,8 @@ require_once 'vendor/autoload.php';
 use src\Application;
 
 $app = new Application();
+$currentPath = getcwd();
+file_put_contents('test.txt', 'PATH:' . $currentPath . PHP_EOL, FILE_APPEND);
 Application::log('Test Cron', 'app', true);
 file_put_contents('test.txt', 'Hello from Cron' . PHP_EOL, FILE_APPEND);
 for ($i = 0; $i < $argc; $i++) {
