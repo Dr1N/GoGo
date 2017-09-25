@@ -46,7 +46,7 @@ class Application
             echo $message . PHP_EOL;
         }
         
-        @file_put_contents("logs/$category.log", date('d.m.Y H:i:s') . "\t" . $message . PHP_EOL, FILE_APPEND);
+        file_put_contents("logs/$category.log", date('d.m.Y H:i:s') . "\t" . $message . PHP_EOL, FILE_APPEND);
     }
 
     public function run($country = null, $city = null)
