@@ -45,8 +45,9 @@ class Application
         if ($console) {
             echo $message . PHP_EOL;
         }
-        $currentPath = getcwd();
-        file_put_contents("logs/$category.log", date('d.m.Y H:i:s') . "\t" . $message . PHP_EOL, FILE_APPEND);
+        //TODO
+        $fullLogPath = getcwd() . DIRECTORY_SEPARATOR . "parser" . DIRECTORY_SEPARATOR . "logs" . DIRECTORY_SEPARATOR . "$category.log";
+        file_put_contents($fullLogPath, date('d.m.Y H:i:s') . "\t" . $message . PHP_EOL, FILE_APPEND);
     }
 
     public function run($country = null, $city = null)
