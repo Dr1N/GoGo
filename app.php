@@ -9,6 +9,7 @@ use src\Application;
 
 $app = new Application();
 $currentPath = getcwd();
+echo $currentPath . PHP_EOL;
 file_put_contents('test.txt', 'PATH:' . $currentPath . PHP_EOL, FILE_APPEND);
 Application::log('Test Cron', 'app', true);
 file_put_contents('test.txt', 'Hello from Cron' . PHP_EOL, FILE_APPEND);
