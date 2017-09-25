@@ -8,6 +8,13 @@ require_once 'vendor/autoload.php';
 use src\Application;
 
 $app = new Application();
+
+file_put_contents('test.txt', 'Hello from Cron', FILE_APPEND);
+for ($i = 0; $i < $argc; $i++) {
+    file_put_contents('test.txt', $argv[$i], FILE_APPEND);
+}
+exit();
+
 if (DB_CLEAR) {
     $app->clear();
 }
@@ -22,8 +29,6 @@ if ($argc == 2) {
         $app->run($country, null);
     }
     exit(0);
-} else {
-    file_put_contents('test.txt', 'Hello from Cron');
 }
 
 echo '### Command Line ###' . PHP_EOL;
