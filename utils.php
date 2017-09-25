@@ -8,4 +8,3 @@ require_once 'vendor/autoload.php';
 use src\Application;
 
 $app = new Application();
-file_put_contents('test.txt', 'Hello from Cron');

@@ -46,7 +46,7 @@ class Application
             echo $message . PHP_EOL;
         }
         //TODO
-        echo "FILE: " . __FILE__ .PHP_EOL;
+        echo "FILE: " . dirname(__DIR__) .PHP_EOL;
         $fullLogPath = getcwd() . DIRECTORY_SEPARATOR . "parser" . DIRECTORY_SEPARATOR . "logs" . DIRECTORY_SEPARATOR . "$category.log";
         file_put_contents($fullLogPath, date('d.m.Y H:i:s') . "\t" . $message . PHP_EOL, FILE_APPEND);
     }
