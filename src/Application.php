@@ -46,7 +46,7 @@ class Application
             echo $message . PHP_EOL;
         }
         $fullLogPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . "logs" . DIRECTORY_SEPARATOR . "$category.log";
-        file_put_contents($fullLogPath, date('d.m.Y H:i:s') . "\t" . $message . PHP_EOL, FILE_APPEND);
+        @file_put_contents($fullLogPath, date('d.m.Y H:i:s') . "\t" . $message . PHP_EOL, FILE_APPEND);
     }
 
     public function run($country = null, $city = null)

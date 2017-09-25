@@ -8,8 +8,6 @@ require_once 'vendor/autoload.php';
 use src\Application;
 
 $app = new Application();
-Application::log('Test Cron', 'app', true);
-exit();
 
 if (DB_CLEAR) {
     $app->clear();
