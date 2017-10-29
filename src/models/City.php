@@ -50,6 +50,14 @@ class City extends Model
      */
     public $parse_urls;
 
+    static public function findById($id)
+    {
+        Application::$db->where('id', $id);
+        $result = Application::$db->getOne(self::$tableName);
+
+        return self::createObjectFromArray($result);
+    }
+
     static public function findByName($name)
     {
         Application::$db->where('name', $name);

@@ -34,6 +34,14 @@ class Country extends Model
      */
     public $start_city_id;
 
+    static public function findById($id)
+    {
+        Application::$db->where('id', $id);
+        $result = Application::$db->getOne(self::$tableName);
+
+        return self::createObjectFromArray($result);
+    }
+
     static public function findByName($name)
     {
         Application::$db->where('name', $name);

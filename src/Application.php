@@ -57,7 +57,12 @@ class Application
         }
 
         if (!empty($country)) {
-            $countryModel = Country::findByName($country);
+            if (!is_numeric($country)) {
+                $countryModel = Country::findByName($country);
+            } else {
+                $countryModel = Country::findById($country);
+            }
+
             if ($countryModel != null) {
                 self::parseAdsFromCountry($countryModel);
             } else {
@@ -65,8 +70,14 @@ class Application
             }
             return;
         }
+
         if (!empty($city)) {
-            $cityModel = City::findByName($city);
+            if (!is_numeric($city)) {
+                $cityModel = City::findByName($city);
+            } else {
+                $cityModel = City::findById($city);
+            }
+
             if ($cityModel != null) {
                 self::parseAdsFromCity($cityModel);
             } else {
